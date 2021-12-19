@@ -427,7 +427,7 @@ class ScriptContextTable : public FixedArray {
 // script will have the ScriptContext rather than a FunctionContext.
 // Script contexts from all top-level scripts are gathered in
 // ScriptContextTable.
-
+// JS 函数是一对 (上下文, 函数代码), to be continued...
 class Context : public HeapObject {
  public:
   NEVER_READ_ONLY_SPACE

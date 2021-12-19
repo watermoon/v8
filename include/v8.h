@@ -193,6 +193,15 @@ class ConsoleCallArguments;
  * behind the scenes and the same rules apply to these values as to
  * their handles.
  */
+// 受 v8 GC 管理的对象的引用. 
+// 所有从 v8 返回的对象都必须能被 GC 跟踪, 以便(GC)能知道对象是否存活. 同样地, GC
+// 可能会移动对象, 所以直接指向一个对象是不安全的. 作为替代, 所有对象都在句柄中存储,
+// GC 知道句柄, 并且会在移动对象时更新(句柄). 句柄应该总是传引用, 除非是作为对外传
+// 出的参数(out-parameters), 并且永远不要在堆上分配.
+//
+// 有两种类型的句柄: 本地和持久句柄
+//
+// ...
 template <class T>
 class Local {
  public:
@@ -365,6 +374,7 @@ using Handle = Local<T>;
  * yet, or because a TerminateExecution exception was thrown. In that case, an
  * empty MaybeLocal is returned.
  */
+// MaybeLocal<> 是对 Local<> 的一个封装, 区别在于在使用前会做一次强行检查
 template <class T>
 class MaybeLocal {
  public:
@@ -8271,6 +8281,9 @@ class V8_EXPORT MeasureMemoryDelegate {
  * thread at any given time.  The Locker/Unlocker API must be used to
  * synchronize.
  */
+// Isolate 代表了一个隔离的 V8 引擎实例. V8 isolates 拥有完全隔离的状态. 一个 isolate
+// 中的对象不能在其它的 isolates 中使用. 嵌入程序可以在多个线程中并行创建多个 isolate.
+// 在任意时刻, 一个 isolate 只有有一个线程进入. 进行同步时必须使用 Locker/Unlocker API
 class V8_EXPORT Isolate {
  public:
   /**
@@ -8295,16 +8308,19 @@ class V8_EXPORT Isolate {
      * Allows the host application to provide the address of a function that is
      * notified each time code is added, moved or removed.
      */
+    // 允许宿主程序同一个通知程序, 此通知程序会在每一次代码被添加、移动和删除是调用
     JitCodeEventHandler code_event_handler;
 
     /**
      * ResourceConstraints to use for the new Isolate.
      */
+    // 用于限制新的 Isolate 可以使用的资源
     ResourceConstraints constraints;
 
     /**
      * Explicitly specify a startup snapshot blob. The embedder owns the blob.
      */
+    // 显式指定启动的 snapshot 块
     StartupData* snapshot_blob;
 
 
@@ -8312,6 +8328,7 @@ class V8_EXPORT Isolate {
      * Enables the host application to provide a mechanism for recording
      * statistics counters.
      */
+    // 允许宿主程序提供一个记录统计数据计数器的机制
     CounterLookupCallback counter_lookup_callback;
 
     /**
@@ -8320,6 +8337,7 @@ class V8_EXPORT Isolate {
      * histogram which will later be passed to the AddHistogramSample
      * function.
      */
+    // 直方图
     CreateHistogramCallback create_histogram_callback;
     AddHistogramSampleCallback add_histogram_sample_callback;
 
@@ -8361,13 +8379,14 @@ class V8_EXPORT Isolate {
      */
     int embedder_wrapper_type_index;
     int embedder_wrapper_object_index;
-  };
+  };  // CreateParams
 
 
   /**
    * Stack-allocated class which sets the isolate for all operations
    * executed within a local scope.
    */
+  // Scope 是一个栈上分配的类, 用于设置 isolate 的所有操作都在一个本地 scope 中执行
   class V8_EXPORT Scope {
    public:
     explicit Scope(Isolate* isolate) : isolate_(isolate) {
@@ -8742,6 +8761,7 @@ class V8_EXPORT Isolate {
    * Dumps activated low-level V8 internal stats. This can be used instead
    * of performing a full isolate disposal.
    */
+  // Dump 激活的底层 V8 内部统计(状态). 这个可以用于替代一个完整的 isolate 销毁
   void DumpAndResetStats();
 
   /**
@@ -8904,6 +8924,8 @@ class V8_EXPORT Isolate {
    * Returns the context of the currently running JavaScript, or the context
    * on the top of the stack if no JavaScript is running.
    */
+  // 返回当前运行中的 JavaScript 的上下文, 如果没有 JavaScript 正在运行则返回栈顶的
+  // 上下文
   Local<Context> GetCurrentContext();
 
   /** Returns the last context entered through V8's C++ API. */
