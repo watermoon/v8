@@ -154,7 +154,7 @@ MaybeHandle<Object> RegExp::Compile(Isolate* isolate, Handle<JSRegExp> re,
                                     JSRegExp::Flags flags,
                                     uint32_t backtrack_limit) {
   DCHECK(pattern->IsFlat());
-
+  std::cout << "### RegExp::Compile| pattern=" << pattern->ToCString() << std::endl;
   // Caching is based only on the pattern and flags, but code also differs when
   // a backtrack limit is set. A present backtrack limit is very much *not* the
   // common case, so just skip the cache for these.
@@ -277,6 +277,7 @@ MaybeHandle<Object> RegExp::ExperimentalOneshotExec(
 MaybeHandle<Object> RegExp::Exec(Isolate* isolate, Handle<JSRegExp> regexp,
                                  Handle<String> subject, int index,
                                  Handle<RegExpMatchInfo> last_match_info) {
+  std::cout << "### RegExp::Exec| typeTag=" << regexp->TypeTag() << " index=" << index << " subject=" << subject->ToCString() << std::endl;
   switch (regexp->TypeTag()) {
     case JSRegExp::NOT_COMPILED:
       UNREACHABLE();
@@ -449,6 +450,7 @@ bool RegExpCodeIsValidForPreCompilation(Handle<JSRegExp> re, bool is_one_byte) {
 bool RegExpImpl::CompileIrregexp(Isolate* isolate, Handle<JSRegExp> re,
                                  Handle<String> sample_subject,
                                  bool is_one_byte) {
+  std::cout << "### RegExpImpl::RegExpInterpreterTrampoline" << std::endl;
   // Compile the RegExp.
   Zone zone(isolate->allocator(), ZONE_NAME);
   PostponeInterruptsScope postpone(isolate);

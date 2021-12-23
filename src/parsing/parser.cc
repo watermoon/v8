@@ -537,6 +537,7 @@ void Parser::ParseProgram(Isolate* isolate, Handle<Script> script,
   }
 
   scanner_.Initialize();
+  std::cout << "### Parser::ParseProgram| 调用 DoParseProgram" << std::endl;
   FunctionLiteral* result = DoParseProgram(isolate, info);
   MaybeResetCharacterStream(info, result);
   MaybeProcessSourceRanges(info, result, stack_limit_);

@@ -201,6 +201,7 @@ Code BuildWithCodeStubAssemblerCS(Isolate* isolate, int32_t builtin_index,
 void SetupIsolateDelegate::AddBuiltin(Builtins* builtins, int index,
                                       Code code) {
   DCHECK_EQ(index, code.builtin_index());
+//   std::cout << "### AddBuiltin| index=" << index << " start=" << (void*)code.entry() << std::endl;
   builtins->set_builtin(index, code);
 }
 
@@ -291,38 +292,45 @@ void SetupIsolateDelegate::SetupBuiltinsInternal(Isolate* isolate) {
   Code code;
 #define BUILD_CPP(Name)                                                      \
   code = BuildAdaptor(isolate, index, FUNCTION_ADDR(Builtin_##Name), #Name); \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_CPP| index=" << index-1 << " func=" << #Name << std::endl;
 #define BUILD_TFJ(Name, Argc, ...)                              \
   code = BuildWithCodeStubAssemblerJS(                          \
       isolate, index, &Builtins::Generate_##Name, Argc, #Name); \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_TFJ| index=" << index-1 << " func=" << #Name << std::endl;
 #define BUILD_TFC(Name, InterfaceDescriptor)                      \
   /* Return size is from the provided CallInterfaceDescriptor. */ \
   code = BuildWithCodeStubAssemblerCS(                            \
       isolate, index, &Builtins::Generate_##Name,                 \
       CallDescriptors::InterfaceDescriptor, #Name);               \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_TFC| index=" << index-1 << " func=" << #Name << std::endl;
 #define BUILD_TFS(Name, ...)                                                   \
   /* Return size for generic TF builtins (stub linkage) is always 1. */        \
   code =                                                                       \
       BuildWithCodeStubAssemblerCS(isolate, index, &Builtins::Generate_##Name, \
                                    CallDescriptors::Name, #Name);              \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_TFS| index=" << index-1 << " func=" << #Name << std::endl;
 #define BUILD_TFH(Name, InterfaceDescriptor)              \
   /* Return size for IC builtins/handlers is always 1. */ \
   code = BuildWithCodeStubAssemblerCS(                    \
       isolate, index, &Builtins::Generate_##Name,         \
       CallDescriptors::InterfaceDescriptor, #Name);       \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_TFH| index=" << index-1 << " func=" << #Name << std::endl;
 
 #define BUILD_BCH(Name, OperandScale, Bytecode)                           \
   code = GenerateBytecodeHandler(isolate, index, OperandScale, Bytecode); \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_BCH| index=" << index-1 << " func=" << #Name << std::endl;
 
 #define BUILD_ASM(Name, InterfaceDescriptor)                                \
   code = BuildWithMacroAssembler(isolate, index, Builtins::Generate_##Name, \
                                  #Name);                                    \
-  AddBuiltin(builtins, index++, code);
+  AddBuiltin(builtins, index++, code); \
+  std::cout << "### BUILD_ASM| index=" << index-1 << " func=" << #Name << std::endl;
 
   BUILTIN_LIST(BUILD_CPP, BUILD_TFJ, BUILD_TFC, BUILD_TFS, BUILD_TFH, BUILD_BCH,
                BUILD_ASM);

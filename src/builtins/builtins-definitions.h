@@ -32,6 +32,8 @@ namespace internal {
 // properly associated with their descriptor.
 
 #define BUILTIN_LIST_BASE(CPP, TFJ, TFC, TFS, TFH, ASM)                        \
+  TFJ(MathIs42, 1, kReceiver, kX)                                              \
+  TFS(MathIsHeapNumber42, kX)                                                  \
   /* GC write barrirer */                                                      \
   TFC(RecordWrite, RecordWrite)                                                \
   TFC(EphemeronKeyBarrier, EphemeronKeyBarrier)                                \

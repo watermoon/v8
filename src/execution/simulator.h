@@ -124,6 +124,7 @@ class GeneratedCode {
 #else
 
   DISABLE_CFI_ICALL Return Call(Args... args) {
+    std::cout << "### GeneratedCode::Call| 调用函数指针" << std::endl;
     // When running without a simulator we call the entry directly.
 #if defined(V8_TARGET_OS_WIN) && !defined(V8_OS_WIN)
     FATAL("Generated code execution not possible during cross-compilation.");

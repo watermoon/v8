@@ -416,6 +416,7 @@ transitioning macro RegExpCreate(implicit context: Context)(
 @export
 transitioning macro RegExpCreate(implicit context: Context)(
     initialMap: Map, maybeString: JSAny, flags: String): JSAny {
+  Print("### tq.RegExpCreate| ");
   const pattern: String =
       maybeString == Undefined ? kEmptyString : ToString_Inline(maybeString);
   const regexp =

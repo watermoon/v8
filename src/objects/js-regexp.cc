@@ -287,6 +287,8 @@ void JSRegExp::MarkTierUpForNextExec() {
 MaybeHandle<JSRegExp> JSRegExp::Initialize(Handle<JSRegExp> regexp,
                                            Handle<String> source,
                                            Handle<String> flags_string) {
+  std::cout << "### JSRegExp::Initialize| source=" << source->ToCString()
+            << " flag=" << flags_string->ToCString() << std::endl;
   Isolate* isolate = regexp->GetIsolate();
   bool success = false;
   Flags flags = JSRegExp::FlagsFromString(isolate, flags_string, &success);
@@ -449,6 +451,8 @@ MaybeHandle<String> EscapeRegExpSource(Isolate* isolate,
 MaybeHandle<JSRegExp> JSRegExp::Initialize(Handle<JSRegExp> regexp,
                                            Handle<String> source, Flags flags,
                                            uint32_t backtrack_limit) {
+  std::cout << "### JSRegExp::Initialize| source=" << source->ToCString() << " limit="
+            << backtrack_limit << std::endl;
   Isolate* isolate = regexp->GetIsolate();
   Factory* factory = isolate->factory();
   // If source is the empty string we set it to "(?:)" instead as

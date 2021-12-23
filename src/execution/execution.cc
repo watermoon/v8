@@ -144,14 +144,18 @@ InvokeParams InvokeParams::SetUpForRunMicrotasks(
 
 Handle<Code> JSEntry(Isolate* isolate, Execution::Target execution_target,
                      bool is_construct) {
+  std::cout << "### JSEntry| #define BUILTIN_CODE(isolate, name) (isolate)->builtins()->builtin_handle(Builtins::k##name)" << std::endl;
   if (is_construct) {
     DCHECK_EQ(Execution::Target::kCallable, execution_target);
+    std::cout << "### JSEntry| BUILTIN_CODE(isolate, JSConstructEntry)" << std::endl;
     return BUILTIN_CODE(isolate, JSConstructEntry);
   } else if (execution_target == Execution::Target::kCallable) {
     DCHECK(!is_construct);
+    std::cout << "### JSEntry| BUILTIN_CODE(isolate, JSEntry)" << std::endl;
     return BUILTIN_CODE(isolate, JSEntry);
   } else if (execution_target == Execution::Target::kRunMicrotasks) {
     DCHECK(!is_construct);
+    std::cout << "### JSEntry| BUILTIN_CODE(isolate, JSRunMicrotasksEntry)" << std::endl;
     return BUILTIN_CODE(isolate, JSRunMicrotasksEntry);
   }
   UNREACHABLE();
@@ -261,7 +265,9 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
 
   // api callbacks can be called directly, unless we want to take the detour
   // through JS to set up a frame for break-at-entry.
+  // api 回调可以被直接调用, 除非我们希望绕路 JS 来为 break-at-entry 建立一个 frame
   if (params.target->IsJSFunction()) {
+    std::cout << "### Execution::Invoke| 目标是一个 JSFunction" << std::endl;
     Handle<JSFunction> function = Handle<JSFunction>::cast(params.target);
     if ((!params.is_construct || function->IsConstructor()) &&
         function->shared().IsApiFunction() &&
@@ -272,6 +278,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
       Handle<Object> receiver = params.is_construct
                                     ? isolate->factory()->the_hole_value()
                                     : params.receiver;
+      std::cout << "### Execution::Invoke| 如果是 Api 函数直接调用 Builtins::InvokeApiFunction" << std::endl;
       auto value = Builtins::InvokeApiFunction(
           isolate, params.is_construct, function, receiver, params.argc,
           params.argv, Handle<HeapObject>::cast(params.new_target));
@@ -306,6 +313,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
   }
 
   // Entering JavaScript.
+  std::cout << "### Execution::Invoke| 进入 JavaScript" << std::endl;
   VMState<JS> state(isolate);
   CHECK(AllowJavascriptExecution::IsAllowed(isolate));
   if (!ThrowOnJavascriptExecution::IsAllowed(isolate)) {
@@ -341,6 +349,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
 
   Handle<Code> code =
       JSEntry(isolate, params.execution_target, params.is_construct);
+  std::cout << "### Execution::Invoke| JSEntry 得到一个 Code 对象 func=" << code->GetName(isolate) << std::endl;
   {
     // Save and restore context around invocation and block the
     // allocation of handles without explicit handle scopes.
@@ -357,6 +366,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
           Address root_register_value, Address new_target, Address target,
           Address receiver, intptr_t argc, Address** argv)>;
       // clang-format on
+      std::cout << "### Execution::Invoke| 根据 Code 对象的开始指令构造 StubEntry" << std::endl;
       JSEntryFunction stub_entry =
           JSEntryFunction::FromAddress(isolate, code->InstructionStart());
 
@@ -365,6 +375,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
       Address recv = params.receiver->ptr();
       Address** argv = reinterpret_cast<Address**>(params.argv);
       RuntimeCallTimerScope timer(isolate, RuntimeCallCounterId::kJS_Execution);
+      std::cout << "### Execution::Invoke| 执行 StubEntry.Call" << std::endl;
       value = Object(stub_entry.Call(isolate->isolate_data()->isolate_root(),
                                      orig_func, func, recv, params.argc, argv));
     } else {
@@ -459,6 +470,7 @@ MaybeHandle<Object> InvokeWithTryCatch(Isolate* isolate,
 MaybeHandle<Object> Execution::Call(Isolate* isolate, Handle<Object> callable,
                                     Handle<Object> receiver, int argc,
                                     Handle<Object> argv[]) {
+  std::cout << "### Execution::Call| callable=" << std::endl;
   return Invoke(isolate, InvokeParams::SetUpForCall(isolate, callable, receiver,
                                                     argc, argv));
 }
@@ -467,6 +479,7 @@ MaybeHandle<Object> Execution::CallBuiltin(Isolate* isolate,
                                            Handle<JSFunction> builtin,
                                            Handle<Object> receiver, int argc,
                                            Handle<Object> argv[]) {
+  std::cout << "### Execution::CallBuiltin| builtin=" << builtin->code().GetName(isolate) << std::endl;
   DCHECK(builtin->code().is_builtin());
   DisableBreak no_break(isolate->debug());
   return Invoke(isolate, InvokeParams::SetUpForCall(isolate, builtin, receiver,

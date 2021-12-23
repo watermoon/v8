@@ -27,6 +27,7 @@ using compiler::Node;
 // Tail calls the regular expression interpreter.
 // static
 void Builtins::Generate_RegExpInterpreterTrampoline(MacroAssembler* masm) {
+  std::cout << "### Builtins::Generate_RegExpInterpreterTrampoline| " << std::endl;
   ExternalReference interpreter_code_entry =
       ExternalReference::re_match_for_call_from_js();
   masm->Jump(interpreter_code_entry);

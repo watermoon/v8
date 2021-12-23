@@ -172,6 +172,7 @@ Code Builtins::builtin(int index) { return isolate_->heap()->builtin(index); }
 
 Handle<Code> Builtins::builtin_handle(int index) {
   DCHECK(IsBuiltinId(index));
+  std::cout << "### Builtins::builtin_handle| index=" << index << std::endl;
   return Handle<Code>(
       reinterpret_cast<Address*>(isolate_->heap()->builtin_address(index)));
 }

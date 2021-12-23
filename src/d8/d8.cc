@@ -570,6 +570,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
                           Local<Value> name, PrintResult print_result,
                           ReportExceptions report_exceptions,
                           ProcessMessageQueue process_message_queue) {
+  std::cout << "### Shell::ExecuteString| 解析(parse)脚本" << std::endl;
   if (i::FLAG_parse_only) {
     i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(isolate);
     i::VMState<PARSER> state(i_isolate);
@@ -609,6 +610,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
 
   MaybeLocal<Value> maybe_result;
   bool success = true;
+  std::cout << "### Shell::ExecuteString| 编译脚本" << std::endl;
   {
     PerIsolateData* data = PerIsolateData::Get(isolate);
     Local<Context> realm =
@@ -655,6 +657,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
       return false;
     }
 
+    std::cout << "### Shell::ExecuteString| 创建代码缓存, 可以是在编译完缓存或者运行后缓存" << std::endl;
     if (options.code_cache_options ==
         ShellOptions::CodeCacheOptions::kProduceCache) {
       // Serialize and store it in memory for the next execution.
@@ -663,6 +666,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
       StoreInCodeCache(isolate, source, cached_data);
       delete cached_data;
     }
+    std::cout << "### Shell::ExecuteString| 执行脚本 script->Run(ctx)" << std::endl;
     maybe_result = script->Run(realm);
     if (options.code_cache_options ==
         ShellOptions::CodeCacheOptions::kProduceCacheAfterExecute) {
@@ -2956,6 +2960,7 @@ bool SourceGroup::Execute(Isolate* isolate) {
     }
 
     // Use all other arguments as names of files to load and run.
+    std::cout << "### SourceGroup::Execute| 执行 js 脚本文件" << std::endl;
     HandleScope handle_scope(isolate);
     Local<String> file_name =
         String::NewFromUtf8(isolate, arg).ToLocalChecked();
@@ -2965,6 +2970,7 @@ bool SourceGroup::Execute(Isolate* isolate) {
       base::OS::ExitProcess(1);
     }
     Shell::set_script_executed();
+    std::cout << "### SourceGroup::Execute| 调用 Shell::ExecuteString 执行脚本内容" << std::endl;
     if (!Shell::ExecuteString(isolate, source, file_name, Shell::kNoPrintResult,
                               Shell::kReportExceptions,
                               Shell::kProcessMessageQueue)) {
@@ -3567,6 +3573,7 @@ bool Shell::SetOptions(int argc, char* argv[]) {
 }
 
 int Shell::RunMain(Isolate* isolate, bool last_run) {
+  std::cout << "### Shell::RunMain| 创建 N(参数指定) 个线程, 每个线程一个 Isolate" << std::endl;
   for (int i = 1; i < options.num_isolates; ++i) {
     options.isolate_sources[i].StartExecuteInThread();
   }
@@ -3577,6 +3584,7 @@ int Shell::RunMain(Isolate* isolate, bool last_run) {
       debug::Coverage::SelectMode(isolate, debug::CoverageMode::kBlockCount);
     }
     HandleScope scope(isolate);
+    std::cout << "### Shell::RunMain| 创建执行上线文(Context)" << std::endl;
     Local<Context> context = CreateEvaluationContext(isolate);
     bool use_existing_context = last_run && use_interactive_shell();
     if (use_existing_context) {
@@ -4060,6 +4068,12 @@ void Shell::WaitForRunningWorkers() {
 }
 
 int Shell::Main(int argc, char* argv[]) {
+  std::cout << "### Shell::Main@d8.cc| argc=" << argc << " ";
+  for (int i = 0; i < argc; ++i) {
+    std::cout << argv[i] << " ";
+  }
+  std::cout << std::endl;
+
   v8::base::EnsureConsoleOutput();
   if (!SetOptions(argc, argv)) return 1;
 
@@ -4130,6 +4144,7 @@ int Shell::Main(int argc, char* argv[]) {
   if (i::FLAG_redirect_code_traces_to == nullptr) {
     V8::SetFlagsFromString("--redirect-code-traces-to=code.asm");
   }
+  std::cout << "### V8 引擎初始化\n";
   v8::V8::InitializePlatform(g_platform.get());
   v8::V8::Initialize();
   if (options.snapshot_blob) {
@@ -4186,6 +4201,7 @@ int Shell::Main(int argc, char* argv[]) {
     }
   }
 
+  std::cout << "### 创建 Isolate\n";
   Isolate* isolate = Isolate::New(create_params);
 
   {
@@ -4232,6 +4248,7 @@ int Shell::Main(int argc, char* argv[]) {
       }
 
       if (options.stress_opt) {
+        std::cout << "### 压测模式运行\n";
         options.stress_runs = D8Testing::GetStressRuns();
         for (int i = 0; i < options.stress_runs && result == 0; i++) {
           printf("============ Stress %d/%d ============\n", i + 1,
@@ -4284,6 +4301,7 @@ int Shell::Main(int argc, char* argv[]) {
         options.compile_options.Overwrite(
             v8::ScriptCompiler::kNoCompileOptions);
       } else {
+        std::cout << "### 执行脚本文件\n";
         bool last_run = true;
         result = RunMain(isolate, last_run);
       }
@@ -4291,6 +4309,7 @@ int Shell::Main(int argc, char* argv[]) {
       // Run interactive shell if explicitly requested or if no script has been
       // executed, but never on --test
       if (use_interactive_shell()) {
+        std::cout << "### 交互 shell 模式运行\n";
         RunShell(isolate);
       }
 

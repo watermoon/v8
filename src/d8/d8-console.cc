@@ -49,6 +49,7 @@ void D8Console::Assert(const debug::ConsoleCallArguments& args,
 
 void D8Console::Log(const debug::ConsoleCallArguments& args,
                     const v8::debug::ConsoleContext&) {
+  std::cout << "### D8Console::Log" << std::endl;
   WriteToFile(nullptr, stdout, isolate_, args);
 }
 

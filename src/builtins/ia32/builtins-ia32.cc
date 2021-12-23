@@ -442,6 +442,7 @@ void Generate_JSEntryVariant(MacroAssembler* masm, StackFrame::Type type,
 }  // namespace
 
 void Builtins::Generate_JSEntry(MacroAssembler* masm) {
+  std::cout << "### Builtins::Generate_JSEntry" << std::endl;
   Generate_JSEntryVariant(masm, StackFrame::ENTRY,
                           Builtins::kJSEntryTrampoline);
 }

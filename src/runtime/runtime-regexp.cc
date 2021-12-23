@@ -1919,7 +1919,7 @@ RUNTIME_FUNCTION(Runtime_RegExpInitializeAndCompile) {
   CONVERT_ARG_HANDLE_CHECKED(JSRegExp, regexp, 0);
   CONVERT_ARG_HANDLE_CHECKED(String, source, 1);
   CONVERT_ARG_HANDLE_CHECKED(String, flags, 2);
-
+  std::cout << "### Runtime_RegExpInitializeAndCompile|" << std::endl;
   RETURN_FAILURE_ON_EXCEPTION(isolate,
                               JSRegExp::Initialize(regexp, source, flags));
 

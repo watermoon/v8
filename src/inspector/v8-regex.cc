@@ -62,6 +62,7 @@ int V8Regex::match(const String16& string, int startFrom,
   v8::Local<v8::Value> argv[] = {
       toV8String(isolate, string.substring(startFrom))};
   v8::Local<v8::Value> returnValue;
+  std::cout << "### \tGet regex::exec" << std::endl;
   if (!exec.As<v8::Function>()
            ->Call(context, regex, arraysize(argv), argv)
            .ToLocal(&returnValue))

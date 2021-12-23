@@ -2122,6 +2122,7 @@ Local<Value> UnboundScript::GetSourceMappingURL() {
 }
 
 MaybeLocal<Value> Script::Run(Local<Context> context) {
+  std::cout << "### Script::Run| 执行脚本" << std::endl;
   auto isolate = reinterpret_cast<i::Isolate*>(context->GetIsolate());
   TRACE_EVENT_CALL_STATS_SCOPED(isolate, "v8", "V8.Execute");
   ENTER_V8(isolate, context, Script, Run, MaybeLocal<Value>(),
@@ -2129,10 +2130,15 @@ MaybeLocal<Value> Script::Run(Local<Context> context) {
   i::HistogramTimerScope execute_timer(isolate->counters()->execute(), true);
   i::AggregatingHistogramTimerScope timer(isolate->counters()->compile_lazy());
   i::TimerEventScope<i::TimerEventExecute> timer_scope(isolate);
+  std::cout << "### Script::Run| 将脚本转成 JSFunction" << std::endl;
   auto fun = i::Handle<i::JSFunction>::cast(Utils::OpenHandle(this));
 
   i::Handle<i::Object> receiver = isolate->global_proxy();
   Local<Value> result;
+  std::cout << "### Script::Run| 调用 Execution::Call => 进入 bytecode" << std::endl;
+  std::cout << "### ========================================================== ###\n" << std::endl;
+  std::cout << "### Script::Run| Call func=" << fun->code().GetName(isolate) << std::endl;
+  // 调用 InterpreterEntryTrampoline(此函数是汇编写的) 进入解析器的 js 代码
   has_pending_exception = !ToLocal<Value>(
       i::Execution::Call(isolate, fun, receiver, 0, nullptr), &result);
 
@@ -9023,6 +9029,10 @@ void Isolate::GetEmbeddedCodeRange(const void** start,
 JSEntryStubs Isolate::GetJSEntryStubs() {
   JSEntryStubs entry_stubs;
 
+  std::cout << "### GetJSEntryStubs| JS 三个入口函数: JSEntry/JSConstructEntry/kJSRunMicrotasksEntry" << std::endl;
+  std::cout << "### GetJSEntryStubs| JSEntry=" << entry_stubs.js_entry_stub.code.start
+            << " JSConstructEntry=" << entry_stubs.js_construct_entry_stub.code.start
+            << " JSRunMicrotasksEntry=" << entry_stubs.js_run_microtasks_entry_stub.code.start << std::endl;
   i::Isolate* isolate = reinterpret_cast<i::Isolate*>(this);
   std::array<std::pair<i::Builtins::Name, JSEntryStub*>, 3> stubs = {
       {{i::Builtins::kJSEntry, &entry_stubs.js_entry_stub},

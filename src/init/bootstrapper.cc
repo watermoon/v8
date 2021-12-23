@@ -2631,6 +2631,7 @@ void Genesis::InitializeGlobal(Handle<JSGlobalObject> global_object,
     Handle<JSObject> math =
         factory->NewJSObject(isolate_->object_function(), AllocationType::kOld);
     JSObject::AddProperty(isolate_, global, "Math", math, DONT_ENUM);
+    SimpleInstallFunction(isolate_, math, "is42", Builtins::kMathIs42, 1, true);
     SimpleInstallFunction(isolate_, math, "abs", Builtins::kMathAbs, 1, true);
     SimpleInstallFunction(isolate_, math, "acos", Builtins::kMathAcos, 1, true);
     SimpleInstallFunction(isolate_, math, "acosh", Builtins::kMathAcosh, 1,
