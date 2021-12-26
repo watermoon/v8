@@ -278,6 +278,7 @@ Code GenerateBytecodeHandler(Isolate* isolate, int builtin_index,
 }  // namespace
 
 // static
+// 初始化 Builtin 方法, 由 Isolate 的 Initialize 方法进入
 void SetupIsolateDelegate::SetupBuiltinsInternal(Isolate* isolate) {
   Builtins* builtins = isolate->builtins();
   DCHECK(!builtins->initialized_);

@@ -3085,6 +3085,7 @@ IGNITION_HANDLER(ResumeGenerator, InterpreterAssembler) {
 
 }  // namespace
 
+// 生成所有字节码的 handler
 Handle<Code> GenerateBytecodeHandler(Isolate* isolate, const char* debug_name,
                                      Bytecode bytecode,
                                      OperandScale operand_scale,
