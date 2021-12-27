@@ -14,6 +14,7 @@ namespace internal {
     }
 
     int demo_cppfunc(const char* msg, int id, int* res) {
+        // mksnapshot 的时候执行
         PrintF("### demo_cppfunc| msg=%s id=%d", msg, id);
         for (int i = 0; i < 3; ++i) {
             demo_callback(id * 10 + i);
@@ -32,14 +33,17 @@ namespace internal {
 
         TVARIABLE(Object, x);
         x = Parameter<Object>(Descriptor::kX);
-        Print(StringConstant("### MathIs42| x="));
+        Print("### MathIs42| x=");
         // Print(x);
 
         // 此时的 x 可能是任意的 JS 对象, 例如 Smi, HeapNumber, 未定义等
         // 调用已有的 builtin 函数 ToNumber
         TNode<Object> number = x.value();
-        Print(StringConstant("### MathIs42| x.value="));
+        Print("### MathIs42| x.value=");
         Print(number);
+
+        // Handle<String> string = isolate()->factory()->NewStringFromAsciiChecked(
+        // ": ", AllocationType::kOld);
 
         int res = 0;
         int ret = demo_cppfunc("test_call_cpp_function", 10, &res);
@@ -95,6 +99,41 @@ namespace internal {
         TNode<Float64T> value = LoadHeapNumberValue(number);
         auto is42 = Float64Equal(value, Float64Constant(42));
         Return(SelectBooleanConstant(is42));
+    }
+
+    TF_BUILTIN(GetStringLen, CodeStubAssembler) {
+        Label not_string(this);
+        TVARIABLE(Object, maybe_string);
+        maybe_string = Parameter<Object>(Descriptor::kInputObject);
+
+        TNode<Object> oStr = maybe_string.value();
+        GotoIf(TaggedIsSmi(oStr), &not_string);
+        PrintF("not smi");
+        Print("Not smi");
+        TNode<String> heapStr = CAST(oStr);
+        GotoIfNot(IsString(heapStr), &not_string);
+        PrintF("is string");
+        Print("Is string");
+
+        Print("### ===============###\n");
+        // TNode<Object> obj = UncheckedCast<Object>(heapStr);
+        // Object object = maybe_string.GetHeapObjectOrSmi();
+        std::ostringstream os;
+        // maybe_string.Print(os);
+        const char* tmp = (const char*)(&heapStr);
+        os << maybe_string << "###" << heapStr << " | " << tmp;
+        for (int i = 0; i < 128; ++i) {
+            char t[32] = {0};
+            sprintf(t, "%d=%c\n", i, tmp[i]);
+            Print(t);
+        }
+
+        Print(os.str().c_str());
+
+        Return(LoadStringLengthAsSmi(heapStr));
+
+        BIND(&not_string);
+        Return(UndefinedConstant());
     }
 }  // namespace internal
 }  // namespace v8

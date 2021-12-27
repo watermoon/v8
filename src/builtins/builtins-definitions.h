@@ -34,6 +34,7 @@ namespace internal {
 #define BUILTIN_LIST_BASE(CPP, TFJ, TFC, TFS, TFH, ASM)                        \
   TFJ(MathIs42, 1, kReceiver, kX)                                              \
   TFS(MathIsHeapNumber42, kX)                                                  \
+  TFJ(GetStringLen, 1, kReceiver, kInputObject)                                \
   /* GC write barrirer */                                                      \
   TFC(RecordWrite, RecordWrite)                                                \
   TFC(EphemeronKeyBarrier, EphemeronKeyBarrier)                                \
