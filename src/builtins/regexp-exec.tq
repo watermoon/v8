@@ -36,7 +36,7 @@ transitioning javascript builtin RegExpPrototypeExec(
       MessageTemplate::kIncompatibleMethodReceiver, 'RegExp.prototype.exec',
       receiver);
   const string = ToString_Inline(string);
-
+  Print("### builtins-RegExpPrototypeExec");
   return IsFastRegExpNoPrototype(receiver) ?
       RegExpPrototypeExecBodyFast(receiver, string) :
       RegExpPrototypeExecSlow(receiver, string);

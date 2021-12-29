@@ -112,6 +112,8 @@ namespace internal {
         Print("Not smi");
         TNode<String> heapStr = CAST(oStr);
         GotoIfNot(IsString(heapStr), &not_string);
+        // int len = 0;
+        // auto tm = heapStr.ToCString(DISALLOW_NULLS, FAST_STRING_TRAVERSAL, &len);
         PrintF("is string");
         Print("Is string");
 

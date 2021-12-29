@@ -15,7 +15,9 @@ transitioning javascript builtin RegExpPrototypeTest(
       otherwise ThrowTypeError(
       MessageTemplate::kIncompatibleMethodReceiver, methodName);
   const str: String = ToString_Inline(string);
+  // 允许快速模式
   if (IsFastRegExpPermissive(receiver)) {
+    // 调用 RegExpPrototypeExecBodyWithoutResultFast@regexp.tq
     RegExpPrototypeExecBodyWithoutResultFast(
         UnsafeCast<JSRegExp>(receiver), str)
         otherwise return False;

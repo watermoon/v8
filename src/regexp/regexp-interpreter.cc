@@ -385,7 +385,7 @@ IrregexpInterpreter::Result RawMatch(
     uint32_t current_char, RegExp::CallOrigin call_origin,
     const uint32_t backtrack_limit) {
   DisallowHeapAllocation no_gc;
-
+  std::cout << "### RawMatch" << std::endl;
 #if V8_USE_COMPUTED_GOTO
 
 // We have to make sure that no OOB access to the dispatch table is possible and
@@ -1059,7 +1059,7 @@ IrregexpInterpreter::Result IrregexpInterpreter::Match(
   bool is_one_byte = String::IsOneByteRepresentationUnderneath(subject_string);
   ByteArray code_array = ByteArray::cast(regexp.Bytecode(is_one_byte));
   int total_register_count = regexp.MaxRegisterCount();
-
+  std::cout << "### Match" << std::endl;
   return MatchInternal(isolate, code_array, subject_string, output_registers,
                        output_register_count, total_register_count,
                        start_position, call_origin, regexp.BacktrackLimit());
@@ -1071,7 +1071,7 @@ IrregexpInterpreter::Result IrregexpInterpreter::MatchInternal(
     int start_position, RegExp::CallOrigin call_origin,
     uint32_t backtrack_limit) {
   DCHECK(subject_string.IsFlat());
-
+  std::cout << "### MatchInternal" << std::endl;
   // Note: Heap allocation *is* allowed in two situations if calling from
   // Runtime:
   // 1. When creating & throwing a stack overflow exception. The interpreter
@@ -1111,6 +1111,8 @@ IrregexpInterpreter::Result IrregexpInterpreter::MatchForCallFromJs(
   DCHECK_NOT_NULL(isolate);
   DCHECK_NOT_NULL(output_registers);
   DCHECK(call_origin == RegExp::CallOrigin::kFromJs);
+  std::cout << "### MatchForCallFromJs" << std::endl;
+  // 第二次到这里, 第三次就没进来了
 
   DisallowHeapAllocation no_gc;
   DisallowJavascriptExecution no_js(isolate);
@@ -1135,6 +1137,8 @@ IrregexpInterpreter::Result IrregexpInterpreter::MatchForCallFromJs(
 IrregexpInterpreter::Result IrregexpInterpreter::MatchForCallFromRuntime(
     Isolate* isolate, Handle<JSRegExp> regexp, Handle<String> subject_string,
     int* output_registers, int output_register_count, int start_position) {
+  std::cout << "### MatchForCallFromRuntime" << std::endl;
+  // 第一次到这里
   return Match(isolate, *regexp, *subject_string, output_registers,
                output_register_count, start_position,
                RegExp::CallOrigin::kFromRuntime);

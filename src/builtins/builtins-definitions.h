@@ -32,9 +32,13 @@ namespace internal {
 // properly associated with their descriptor.
 
 #define BUILTIN_LIST_BASE(CPP, TFJ, TFC, TFS, TFH, ASM)                        \
+  CPP(RiskSetPattern)                                                          \
+  CPP(RiskTestPattern)                                                         \
+  CPP(RiskGetLastError)                                                        \
   TFJ(MathIs42, 1, kReceiver, kX)                                              \
   TFS(MathIsHeapNumber42, kX)                                                  \
   TFJ(GetStringLen, 1, kReceiver, kInputObject)                                \
+  /* end of risk builtins */                                                   \
   /* GC write barrirer */                                                      \
   TFC(RecordWrite, RecordWrite)                                                \
   TFC(EphemeronKeyBarrier, EphemeronKeyBarrier)                                \

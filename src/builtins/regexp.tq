@@ -98,6 +98,7 @@ transitioning macro RegExpPrototypeExecBodyWithoutResult(
 
   const lastMatchInfo: RegExpMatchInfo = GetRegExpLastMatchInfo();
 
+  // 调用 RegExpExecInternal @builtins-regexp-gen.cc
   const matchIndices =
       RegExpExecInternal(regexp, string, lastIndex, lastMatchInfo);
 
@@ -123,6 +124,9 @@ transitioning macro RegExpPrototypeExecBodyWithoutResult(
 transitioning macro RegExpPrototypeExecBodyWithoutResultFast(
     implicit context: Context)(regexp: JSRegExp, string: String):
     RegExpMatchInfo labels IfDidNotMatch {
+  // 经常看到 LoadLastIndexAsLength 这个函数, 但是不知道是干嘛用的
+  // 最后会调到 CSA 的 FastStoreLastIndex => FastLoadLastIndexBeforeSmiCheck @builtins-regexp-gen.cc
+  //  => LoadObjectField
   const lastIndex = LoadLastIndexAsLength(regexp, true);
   return RegExpPrototypeExecBodyWithoutResult(regexp, string, lastIndex, true)
       otherwise IfDidNotMatch;

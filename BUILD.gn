@@ -2372,6 +2372,7 @@ v8_source_set("v8_base_without_compiler") {
     "src/builtins/builtins-error.cc",
     "src/builtins/builtins-function.cc",
     "src/builtins/builtins-global.cc",
+    "src/builtins/builtins-risk.cc",
     "src/builtins/builtins-internal.cc",
     "src/builtins/builtins-intl.cc",
     "src/builtins/builtins-json.cc",
@@ -3306,6 +3307,10 @@ v8_source_set("v8_base_without_compiler") {
     "src/strings/unicode.h",
     "src/strings/uri.cc",
     "src/strings/uri.h",
+    "src/risk/risk.cc",
+    "src/risk/risk.h",
+    "src/risk/hs-helper.h",
+    "src/risk/hs-helper.cc",
     "src/tasks/cancelable-task.cc",
     "src/tasks/cancelable-task.h",
     "src/tasks/task-utils.cc",
@@ -3891,7 +3896,10 @@ v8_source_set("v8_base_without_compiler") {
     deps += [ ":postmortem-metadata" ]
   }
 
-  libs = []
+  include_dirs = ["third_party/hyperscan/src"]
+  lib_dirs = ["/data/code/riskbot/unittest/multi-pattern-match/hyperscan/build/lib"]
+  libs = ["hs"]
+  #libs = []
 
   if (v8_enable_third_party_heap) {
     libs += v8_third_party_heap_libs

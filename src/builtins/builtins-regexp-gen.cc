@@ -367,6 +367,7 @@ void RegExpBuiltinsAssembler::GetStringPointers(
   *var_string_end = ReinterpretCast<RawPtrT>(IntPtrAdd(string_data, to_offset));
 }
 
+// regexp.test 最后会调到这里
 TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
     TNode<Context> context, TNode<JSRegExp> regexp, TNode<String> string,
     TNode<Number> last_index, TNode<RegExpMatchInfo> match_info) {
@@ -449,7 +450,10 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
   TVARIABLE(Object, var_bytecode);
 
   {
+    // direct_string_data - 字符串数据
+    // var_string_start/var_string_end - 字符串所在内存偏移?
     TNode<RawPtrT> direct_string_data = to_direct.PointerToData(&runtime);
+    Print("提取字符串");
 
     Label next(this), if_isonebyte(this), if_istwobyte(this, Label::kDeferred);
     Branch(IsOneByteStringInstanceType(to_direct.instance_type()),
@@ -496,6 +500,8 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
   }
 #endif
 
+  Print("提取字符串后");
+  Print(var_code.value());
   GotoIf(TaggedIsSmi(var_code.value()), &runtime);
   TNode<Code> code = CAST(var_code.value());
 
@@ -513,6 +519,7 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
     MachineType retval_type = type_int32;
 
     // Argument 0: Original subject string.
+    // 参数 0: 原始的字符串对象
     MachineType arg0_type = type_tagged;
     TNode<String> arg0 = string;
 
@@ -522,6 +529,7 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
 
     // Argument 2: Start of string data. This argument is ignored in the
     // interpreter.
+    // 参数 2: 字符串开始的位置
     MachineType arg2_type = type_ptr;
     TNode<RawPtrT> arg2 = var_string_start.value();
 
@@ -537,6 +545,7 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
     // Argument 5: Number of capture registers.
     // Setting this to the number of registers required to store all captures
     // forces global regexps to behave as non-global.
+    // 参数 5: 捕捉寄存器的数量
     TNode<Smi> capture_count = CAST(UnsafeLoadFixedArrayElement(
         data, JSRegExp::kIrregexpCaptureCountIndex));
     // capture_count is the number of captures without the match itself.
@@ -550,6 +559,7 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
 
     // Argument 6: Start (high end) of backtracking stack memory area. This
     // argument is ignored in the interpreter.
+    // 参数 6: 回溯栈内存区域的开始位置(高位置)
     TNode<RawPtrT> stack_top = UncheckedCast<RawPtrT>(
         Load(MachineType::Pointer(), regexp_stack_memory_top_address));
 
@@ -575,6 +585,9 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
     // may also point to a Regex interpreter entry trampoline which does not
     // have a function descriptor. This method is ineffective on other platforms
     // and is equivalent to CallCFunction.
+    // 调用函数进行正则匹配
+    Print("RegExpExecInternal| default - irregexp");
+    Print(string);
     TNode<Int32T> result =
         UncheckedCast<Int32T>(CallCFunctionWithoutFunctionDescriptor(
             code_entry, retval_type, std::make_pair(arg0_type, arg0),
@@ -688,6 +701,8 @@ TNode<HeapObject> RegExpBuiltinsAssembler::RegExpExecInternal(
 
   BIND(&runtime);
   {
+    Print("RegExpExecInternal| runtime");
+    Print(string);
     var_result = CAST(CallRuntime(Runtime::kRegExpExec, context, regexp, string,
                                   last_index, match_info));
     Goto(&out);

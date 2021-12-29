@@ -2627,6 +2627,15 @@ void Genesis::InitializeGlobal(Handle<JSGlobalObject> global_object,
     InstallToStringTag(isolate_, json_object, "JSON");
   }
 
+  {  // -- Risk
+    Handle<JSObject> risk =
+        factory->NewJSObject(isolate_->object_function(), AllocationType::kOld);
+    JSObject::AddProperty(isolate_, global, "Risk", risk, DONT_ENUM);
+    SimpleInstallFunction(isolate_, risk, "setPattern", Builtins::kRiskSetPattern, 1, false);
+    SimpleInstallFunction(isolate_, risk, "testPattern", Builtins::kRiskTestPattern, 2, false);
+    SimpleInstallFunction(isolate_, risk, "getLastError", Builtins::kRiskGetLastError, 1, false);
+  }
+
   {  // -- M a t h
     Handle<JSObject> math =
         factory->NewJSObject(isolate_->object_function(), AllocationType::kOld);
