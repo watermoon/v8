@@ -753,6 +753,8 @@ V8_INLINE static bool HasWeakHeapObjectTag(const Object value) {
 // during GC other data (e.g. mark bits, forwarding addresses) is sometimes
 // encoded in the first word.  The class MapWord is an abstraction of the
 // value in a heap object's first word.
+// 堆对象通过都在它们的第一个字(word)有保存一个 map 指针.  然后在 GC 期间, 其它数据有
+// 时候也会编码进第一个字
 class MapWord {
  public:
   // Normal state: the map word contains a map pointer.

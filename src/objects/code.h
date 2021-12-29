@@ -76,8 +76,12 @@ class Code : public HeapObject {
   NEVER_READ_ONLY_SPACE
   // Opaque data type for encapsulating code flags like kind, inline
   // cache state, and arguments count.
+  // 隐晦的数据封装, 例如类型, inline cache 状态, 参数数量
   using Flags = uint32_t;
 
+  // 所有的代码对象都是如下布局
+  // 三种对齐方式: 代码对齐、meta 对齐、obj 对齐
+  // meta 信息包含: handler 表 offset、常量池 offset、代码注释 offset、unwinding-info offset
   // All Code objects have the following layout:
   //
   //  +--------------------------+
@@ -86,7 +90,7 @@ class Code : public HeapObject {
   //  +--------------------------+  <-- raw_body_start()
   //  |       instructions       |   == raw_instruction_start()
   //  |           ...            |
-  //  | padded to meta alignment |      see kMetadataAlignment
+  //  | padded to meta alignment |      see kMetadataAlignment = size(int)
   //  +--------------------------+  <-- raw_instruction_end()
   //  |         metadata         |   == raw_metadata_start() (MS)
   //  |           ...            |
@@ -102,6 +106,8 @@ class Code : public HeapObject {
   // In other words, the variable-size 'body' consists of 'instructions' and
   // 'metadata'.
   //
+  // raw_ 开头的访问堆内
+  // 驼峰命名则可能是堆外
   // Note the accessor functions below may be prefixed with 'raw'. In this case,
   // raw accessors (e.g. raw_instruction_start) always refer to the on-heap
   // Code object, while camel-case accessors (e.g. InstructionStart) may refer
@@ -211,6 +217,7 @@ class Code : public HeapObject {
 #endif
 
   // [relocation_info]: Code relocation information
+  // DECL_ACCESSORS 是定义 get/set 接口, get 是有两个接口(带不带 const)
   DECL_ACCESSORS(relocation_info, ByteArray)
 
   // This function should be called only from GC.
@@ -227,10 +234,12 @@ class Code : public HeapObject {
   inline ByteArray SourcePositionTable() const;
 
   // [code_data_container]: A container indirection for all mutable fields.
+  // 多了一个 get/set, 带参数 RelaxedLoadTag/AcquireLoadTag/ReleaseStoreTag, 有点像内存屏障
   DECL_RELEASE_ACQUIRE_ACCESSORS(code_data_container, CodeDataContainer)
 
   // [next_code_link]: Link for lists of optimized or deoptimized code.
   // Note that this field is stored in the {CodeDataContainer} to be mutable.
+  // 优化/反优化代码的链表
   inline Object next_code_link() const;
   inline void set_next_code_link(Object value);
 

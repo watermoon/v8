@@ -20,6 +20,9 @@ namespace internal {
 // predicates that check Smi and heap object tags' values and also take into
 // account whether the tagged value is expected to be weak reference to a
 // HeapObject or cleared weak reference.
+// TaggedImpl 是 Object/MaybeObject 的基类
+//  Object 是一个 Smi 或者一个强引用的 HeapObject)
+//  MaybeObject 还可以是弱引用甚至是已清除引用的 HeapOjbect
 template <HeapObjectReferenceType kRefType, typename StorageType>
 class TaggedImpl {
  public:

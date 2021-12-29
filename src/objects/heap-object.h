@@ -194,6 +194,23 @@ class HeapObject : public Object {
   void RehashBasedOnMap(Isolate* isolate);
 
   // Layout description.
+  // (HeapObject) 布局(即字段 field), 实际上指定以类一个匿名的枚举
+  /*
+   enum {
+     HEAP_OBJECT_FIELDS_0 = 0 - 1,
+     // HEAP_OBJECT_FIELDS(DEFINE_ONE_FIELD_OFFSET) =>
+     //   DEFINE_ONE_FIELD_OFFSET(kMapOffset, kTaggedSize) =>
+     //     kMapOffset, kMapOffsetEnd = kMapOffset + kTaggedSize - 1,
+     //     kHeaderSize, kHeaderSizeEnd = kHeaderSize + 0 - 1, 
+   };
+   // 所以宏展开后的结果是:
+   enum {
+     HEAP_OBJECT_FIELDS_0 = -1,
+     kMapOffset, kMapOffsetEnd = kMapOffset + 3,      // kTaggedSize = 4
+     kHeaderSize, kHeaderSizeEnd = kHeaderSize - 1, 
+   }
+   // 没看到定义决定的成员变量
+   */
 #define HEAP_OBJECT_FIELDS(V) \
   V(kMapOffset, kTaggedSize)  \
   /* Header size. */          \
@@ -202,10 +219,11 @@ class HeapObject : public Object {
   DEFINE_FIELD_OFFSET_CONSTANTS(Object::kHeaderSize, HEAP_OBJECT_FIELDS)
 #undef HEAP_OBJECT_FIELDS
 
-  STATIC_ASSERT(kMapOffset == Internals::kHeapObjectMapOffset);
+  STATIC_ASSERT(kMapOffset == Internals::kHeapObjectMapOffset); // 0
 
   using MapField = TaggedField<MapWord, HeapObject::kMapOffset>;
 
+  // 通过字段偏移获得
   inline Address GetFieldAddress(int field_offset) const;
 
  protected:
@@ -214,6 +232,7 @@ class HeapObject : public Object {
   enum class AllowInlineSmiStorage { kRequireHeapObjectTag, kAllowBeingASmi };
   inline HeapObject(Address ptr, AllowInlineSmiStorage allow_smi);
 
+  // OBJECT_CONSTRUCTORS 宏: 定义构造函数, 第一个是类名, 第二个是基类名
   OBJECT_CONSTRUCTORS(HeapObject, Object);
 };
 
