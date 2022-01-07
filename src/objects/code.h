@@ -298,6 +298,7 @@ class Code : public HeapObject {
   // retain the deoptimized code on soft deopts for a certain number of soft
   // deopts. This field keeps track of the number of deoptimizations we have
   // seen so far.
+  // 在 turboprop 中保留一定数量的 soft deopts, 这个 soft deopts 怎么理解?
   inline int deoptimization_count() const;
   inline void increment_deoptimization_count();
 
@@ -327,6 +328,7 @@ class Code : public HeapObject {
 
   // [is_off_heap_trampoline]: For kind BUILTIN tells whether
   // this is a trampoline to an off-heap builtin.
+  // off-heap-trampoline 即 embedded 的 builtin
   inline bool is_off_heap_trampoline() const;
 
   // Get the safepoint entry for the given pc.
@@ -417,6 +419,7 @@ class Code : public HeapObject {
 
   // Returns false if this is an embedded builtin Code object that's in
   // read_only_space and hence doesn't have execute permissions.
+  // embedded builtin 代码对象会返回 false, 因此它们在只读区
   inline bool IsExecutable();
 
   // Returns true if the function is inlined in the code.
@@ -618,6 +621,7 @@ class AbstractCode : public HeapObject {
 // empty_weak_fixed_array()
 //
 // The list of weak fixed arrays is ordered by dependency groups.
+// 依赖代码是一个单链接, 根据 DependencyGroup 排序
 
 class DependentCode : public WeakFixedArray {
  public:
@@ -847,6 +851,7 @@ class BytecodeArray : public FixedArrayBase {
 // the literal array will contain these functions.
 //
 // It can be empty.
+// 用于保存已优化代码的反优化数据
 class DeoptimizationData : public FixedArray {
  public:
   // Layout description.  Indices in the array.

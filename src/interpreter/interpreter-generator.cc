@@ -64,6 +64,7 @@ using Label = CodeStubAssembler::Label;
 //
 // Load literal '0' into the accumulator.
 IGNITION_HANDLER(LdaZero, InterpreterAssembler) {
+  Comment("========= Dispatch");
   TNode<Number> zero_value = NumberConstant(0.0);
   SetAccumulator(zero_value);
   Dispatch();

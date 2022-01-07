@@ -12,3 +12,42 @@
     * dispatch table: 字节码分发表
 * builtin 编译后会生成 snapshot_blob.bin 文件
 * bytecode handler 只是一种 Builtin，还有其它的 Builtin，byteocde 是 Builtin，Builtin 并不都是 bytecode
+* 寄器存访问公式：r[i]=FP-2-kFixedFrameHeaderSize-i
+* 参数访问公式：a[i]=FP+2+parameter_count-i-1，parameter_count表示参数的数量
+* IGNITION_HANDLER: 生成 bytecode handler 的宏
+* 生成 ide 编译工程
+    ```bash
+    # xcode
+    gn gen --ide=xcode ../proj --args="is_component_build = true is_debug = true v8_optimized_debug = false"
+    # or
+    gn gen --ide=xcode ../proj --args="is_component_build = true symbol_level = 2 is_debug = true v8_optimized_debug = false"
+    # visual studio
+    gn gen --ide=vs ../proj --args="is_component_build = true is_debug = true v8_optimized_debug = false"
+    ```
+  * args.gn
+      ```bash
+      is_component_build = true
+      is_debug = true
+      symbol_level = 2
+      target_cpu = "x64"
+      use_goma = false
+      goma_dir = "None"
+      v8_enable_backtrace = true
+      v8_enable_fast_mksnapshot = true
+      v8_enable_slow_dchecks = true
+      v8_optimized_debug = false
+      ```
+  * api.h 这个文件的接口值得好好看一下
+* gdb -q ./d8
+    ```bash
+    r --allow_natives_syntax ./test.js
+    a = [12, "ab"]
+    %DebugPrint(a)
+    disas main # 反汇编
+    x/gx addr # 打印地址
+    # 加断点
+    b v8::base::ieee754::cosh
+    # 在 GDB 显示 %DebugPrint(在设置了断点的情况下)
+    r --allow_natives_syntax ./test.js > ~/Desktop/out.log # %DebugPrint 重定向到文件 out.log
+    # v8 对象的内存结构
+    ```

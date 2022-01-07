@@ -21,6 +21,7 @@
 #include "src/third_party/vtune/v8-vtune.h"
 #endif
 
+
 #include "include/libplatform/libplatform.h"
 #include "include/libplatform/v8-tracing.h"
 #include "include/v8-inspector.h"
@@ -573,6 +574,8 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
   if (i::FLAG_parse_only) {
     i::Isolate* i_isolate = reinterpret_cast<i::Isolate*>(isolate);
     i::VMState<PARSER> state(i_isolate);
+    // Local<String> 转 v8::internal::Handle<String>
+    // 反过来是不是就可以实现之前的问题了呢? refer to api.h
     i::Handle<i::String> str = Utils::OpenHandle(*(source));
 
     // Set up ParseInfo.
@@ -589,6 +592,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
 
     i::ParseInfo parse_info(i_isolate, flags, &compile_state);
 
+    // 这里开始解析代码, 结果是 Script 对象
     i::Handle<i::Script> script = parse_info.CreateScript(
         i_isolate, str, i::kNullMaybeHandle, ScriptOriginOptions());
     if (!i::parsing::ParseProgram(&parse_info, script, i_isolate,
@@ -616,9 +620,10 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
     Context::Scope context_scope(realm);
     MaybeLocal<Script> maybe_script;
     Local<Context> context(isolate->GetCurrentContext());
-    ScriptOrigin origin(name);
+    ScriptOrigin origin(name);  // name 是脚本名字, source 是脚本内容
 
     if (options.compile_options == ScriptCompiler::kConsumeCodeCache) {
+      // 这里的缓存只是 d8 这个程序的缓存
       ScriptCompiler::CachedData* cached_code =
           LookupCodeCache(isolate, source);
       if (cached_code != nullptr) {
@@ -4062,7 +4067,7 @@ void Shell::WaitForRunningWorkers() {
 int Shell::Main(int argc, char* argv[]) {
   v8::base::EnsureConsoleOutput();
   if (!SetOptions(argc, argv)) return 1;
-
+ 
   v8::V8::InitializeICUDefaultLocation(argv[0], options.icu_data_file);
 
 #ifdef V8_INTL_SUPPORT

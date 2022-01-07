@@ -33,7 +33,9 @@ class Zone;
 // program  and the allocation of the scope's variables. Scope information
 // is stored in a compressed form in ScopeInfo objects and is used
 // at runtime (stack dumps, deoptimization, etc.).
-
+// ScopeInfo 表示不同一个原成员的不同 scopes 信息和 scope 的变量分配
+// Scope 信息以压缩的形式存储在 ScopeInfo 对象中, 然后在运行时使用(stack dumps, 逆优化等)
+//
 // This object provides quick access to scope info details for runtime
 // routines.
 class ScopeInfo : public FixedArray {

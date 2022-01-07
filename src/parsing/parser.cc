@@ -564,6 +564,8 @@ FunctionLiteral* Parser::DoParseProgram(Isolate* isolate, ParseInfo* info) {
   // background thread. We should not access anything Isolate / heap dependent
   // via ParseInfo, and also not pass it forward. If not on the main thread
   // isolate will be nullptr.
+  // 注意到这个函数既可以从主线程也可以从后台线程调用, 所以这里不应该通过 ParseInfo 访问任何
+  // Isolate/heap 相关的数据, 也不应该往下面传递. 如果不是主线程, isolate 会是 nullptr
   DCHECK_EQ(parsing_on_main_thread_, isolate != nullptr);
   DCHECK_NULL(scope_);
 

@@ -28,12 +28,12 @@
         * HeapNumber
         * Name
           * String
-            * SeqString
-            * SlicedString
-            * ConsString
-            * ThinString
-            * ExternalString
-            * InternalizedString
+            * SeqString         // 堆中连续空间(数组)存储的字符串, 又分单字节和双字节(unicode)
+            * SlicedString      // 采用 offset 和 lenght 切割 parent 字符串的一部分
+            * ConsString        // 采用树形拼接的字符串 first + second
+            * ThinString        // 引用另外一个字符串 actual
+            * ExternalString    // 堆外的字符串, 又分单双字节
+            * InternalizedString  // 固话到 StringTable 的字符串, 类似于字符串常量池
       * Context
       * DescriptorArray
       * PropertyArray
@@ -73,3 +73,14 @@
         * TURBOPROP
         * TURBOFAN
         * ...
+* String
+    * StringShape: 字符串类型
+    * Encoding: 单双字节
+    * FlatContent
+    * 最大长度: 32-bit ~ 268.4M, 64-bit ~ 536.8M
+    * 内存占用公式: n 个字符的字符串消耗内存 `12 + 4 * Math.ceil(n/4)`
+    * 疑惑: why?
+        * 计算 hash 的最大长度才 16383, 如果字符串大于这个长度, 直接用字符串长度作为 hash 值?
+        * kMaxHashCalcLength@string.h 注释如是说
+* Map: 每一个堆对象都有一个 Map 描述它的结构, Map 包含 object 的 Size 信息, 如何迭代一个 object(for GC)
+    * 这个类很重要, 需要搞懂

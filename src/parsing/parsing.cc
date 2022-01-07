@@ -47,6 +47,7 @@ bool ParseProgram(ParseInfo* info, Handle<Script> script,
 
   // Create a character stream for the parser.
   Handle<String> source(String::cast(script->source()), isolate);
+  // 统计解析的字符数
   isolate->counters()->total_parse_size()->Increment(source->length());
   std::unique_ptr<Utf16CharacterStream> stream(
       ScannerStream::For(isolate, source));
@@ -56,6 +57,7 @@ bool ParseProgram(ParseInfo* info, Handle<Script> script,
 
   // Ok to use Isolate here; this function is only called in the main thread.
   DCHECK(parser.parsing_on_main_thread_);
+  // 进入解析函数
   parser.ParseProgram(isolate, script, info, maybe_outer_scope_info);
   MaybeReportErrorsAndStatistics(info, script, isolate, &parser, mode);
   return info->literal() != nullptr;

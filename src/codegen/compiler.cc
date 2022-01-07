@@ -1325,6 +1325,7 @@ MaybeHandle<SharedFunctionInfo> CompileToplevel(
                parse_info->flags().is_eval() ? "V8.CompileEval" : "V8.Compile");
 
   // Prepare and execute compilation of the outer-most function.
+  // 准备并且执行最外层函数的编译
 
   // Create the SharedFunctionInfo and add it to the script's list.
   Handle<SharedFunctionInfo> shared_info =
@@ -2673,6 +2674,7 @@ MaybeHandle<SharedFunctionInfo> Compiler::GetSharedFunctionInfoForScript(
     }
 
     // First check per-isolate compilation cache.
+    // 检查 isolate 是否有编译缓存, 这个编译缓存能否跨 isolate 共享呢?
     maybe_result = compilation_cache->LookupScript(
         source, script_details.name_obj, script_details.line_offset,
         script_details.column_offset, origin_options, isolate->native_context(),
@@ -2711,6 +2713,7 @@ MaybeHandle<SharedFunctionInfo> Compiler::GetSharedFunctionInfoForScript(
     if (FLAG_stress_background_compile &&
         CanBackgroundCompile(script_details, origin_options, extension,
                              compile_options, natives)) {
+      // 后台编译
       // If the --stress-background-compile flag is set, do the actual
       // compilation on a background thread, and wait for its result.
       maybe_result = CompileScriptOnBothBackgroundAndMainThread(
@@ -2730,6 +2733,7 @@ MaybeHandle<SharedFunctionInfo> Compiler::GetSharedFunctionInfoForScript(
     }
 
     // Add the result to the isolate cache.
+    // 将编译结果加到 isolate 的缓存中
     Handle<SharedFunctionInfo> result;
     if (use_compilation_cache && maybe_result.ToHandle(&result)) {
       DCHECK(is_compiled_scope.is_compiled());

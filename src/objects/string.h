@@ -93,6 +93,8 @@ class StringShape {
 //    ordered sequence of zero or more 16-bit unsigned integer values.
 //
 // All string values have a length field.
+// 一个字符串值是一个 String 类型的成员?. 且是一个有限的包含 0 个或者更多 16-bit
+// 无符号整数的有序数列
 class String : public TorqueGeneratedString<String, Name> {
  public:
   enum Encoding { ONE_BYTE_ENCODING, TWO_BYTE_ENCODING };
@@ -106,6 +108,8 @@ class String : public TorqueGeneratedString<String, Name> {
   // TODO(solanes): Move FlatContent into FlatStringReader, and make it private.
   // This would de-duplicate code, as well as taking advantage of the fact that
   // FlatStringReader is relocatable.
+  // 一个字符串的 flat 内容表示
+  // 一个 flat string 的内容被编码成单字节字符或者双字节字符的序列
   class FlatContent {
    public:
     // Returns true if the string is flat and this structure contains content.

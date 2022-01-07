@@ -1268,6 +1268,8 @@ static void Generate_InterpreterPushArgs(MacroAssembler* masm,
                TurboAssembler::PushArrayOrder::kReverse);
 }
 
+// 寄器存访问公式：r[i]=FP-2-kFixedFrameHeaderSize-i
+// 参数访问公式：a[i]=FP+2+parameter_count-i-1，parameter_count表示参数的数量
 // static
 void Builtins::Generate_InterpreterPushArgsThenCallImpl(
     MacroAssembler* masm, ConvertReceiverMode receiver_mode,

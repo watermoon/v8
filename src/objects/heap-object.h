@@ -208,7 +208,8 @@ class HeapObject : public Object {
      HEAP_OBJECT_FIELDS_0 = -1,
      kMapOffset, kMapOffsetEnd = kMapOffset + 3,      // kTaggedSize = 4
      kHeaderSize, kHeaderSizeEnd = kHeaderSize - 1, 
-   }
+   };
+   // HeapObject::kHeaderSize = 4 => 定定义此枚举值
    // 没看到定义决定的成员变量
    */
 #define HEAP_OBJECT_FIELDS(V) \
@@ -218,6 +219,22 @@ class HeapObject : public Object {
 
   DEFINE_FIELD_OFFSET_CONSTANTS(Object::kHeaderSize, HEAP_OBJECT_FIELDS)
 #undef HEAP_OBJECT_FIELDS
+// 宏展开
+// enum {
+//   HEAP_OBJECT_FIELDS_0 = -1,
+//   //DEFINE_ONE_FIELD_OFFSET(kMapOffset, kTaggedSize),
+//   kMapOffset, kMapOffsetEnd = kMapOffset + (kTaggedSize) - 1,
+//   // DEFINE_ONE_FIELD_OFFSET(kHeaderSize, 0),
+//   kHeaderSize, kHeaderSizeEnd = kHeaderSize + (0) - 1,
+// };
+// 宏展开结束
+// #define DEFINE_ONE_FIELD_OFFSET(Name, Size) Name, Name##End = Name + (Size)-1,
+
+// #define DEFINE_FIELD_OFFSET_CONSTANTS(StartOffset, LIST_MACRO) \
+//   enum {                                                       \
+//     LIST_MACRO##_StartOffset = StartOffset - 1,                \
+//     LIST_MACRO(DEFINE_ONE_FIELD_OFFSET)                        \
+//   };
 
   STATIC_ASSERT(kMapOffset == Internals::kHeapObjectMapOffset); // 0
 
