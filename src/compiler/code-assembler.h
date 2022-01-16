@@ -373,6 +373,21 @@ TNode<Float64T> Float64Add(TNode<Float64T> a, TNode<Float64T> b);
 // The CodeAssembler itself is stateless (and instances are expected to be
 // temporary-scoped and short-lived); all its state is encapsulated into
 // a CodeAssemblerState instance.
+//
+// 一个被组件用于在 compiler 目录外基于 TurboFan 的后端创建代码对象的"公开"接口.
+// 这个类主要是 RawMachineAssembler 的一个薄薄的楔子, 它的主要工作是保证
+// RawMachineAssembler 内部结构和其它编译器实现细节不外泄到 compiler 目录外.
+//
+// 需要用这个接口来生成低级代码的 V8 组件需要包含这个头文件, 且仅需要 compiler 目录
+// 内的这个头文件(实际上是强制的). 由于所有的相关结构都是前置声明的, 客户端无法窥探
+// 编译器的内部结构.
+//
+// 除了提供 TurboFan 和代码生成客户端的隔离外, CodeAssembler 也提供抽象来创建变量和
+// 提高标签功能来合并路径上, 包括循环中的不同值的变量 - 翻译得狗屁不通, 还是看原文吧
+//
+// CodeAssembler 本身是无状态的(它的实例期望是在临时作用域内, 短命的); 它的所有状态
+// 都被封装到一个 CodeAssemblerState 实例中
+//
 class V8_EXPORT_PRIVATE CodeAssembler {
  public:
   explicit CodeAssembler(CodeAssemblerState* state) : state_(state) {}
