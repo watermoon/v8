@@ -84,6 +84,10 @@ struct PointerWithPayloadTraits<Scope> {
 // and ModuleScope. DeclarationScope is used for any scope that hosts 'var'
 // declarations. This includes script, module, eval, varblock, and function
 // scope. ModuleScope further specializes DeclarationScope.
+// JS 环境在解析器中用 Scope, DeclarationScope, ModuleScope 表示.
+// DeclarationScope 用于任何包含了 'var' 声明的域, 包括脚本、模块、eval、
+// varblock(变量块?)和函数域
+// ModuleScope 进一步特例化了 DeclarationScope
 class V8_EXPORT_PRIVATE Scope : public NON_EXPORTED_BASE(ZoneObject) {
  public:
   // ---------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 --------------  <= 0x22c708148aa0 对象首地址(0x22c708148aa1 - 1)
 | 0x0830394d |  <= Map 的地址
 |------------|
-| 0x08042229 |  <= properties
+| 0x08042229 |  <= properties, 有三种属性: in-object/fast/slow
 |------------|
 | 0x082d2611 |  <= elements
 |------------|
@@ -12,7 +12,23 @@
 |------------|
 ```
 
-
+* 注意: 由于是小端, 输出的数据若单位大于 1 个字节, 则需要字节序转换一下
+### 常用 gdb 命令
+* 打印实例大小, 输出的第一个值即大小, 单位 word, 0 表示对象大小是变化的
+    ```bash
+    (gdb) x/4ub 0x22c70830394d + 3
+    ```
+* 打印对象类型, 输出的第一个数值到 ElementsKindToString 函数查询对应的类型
+    ```bash
+    x/4ub map + 7
+    ```
+* 打印实例描述符数量
+    ```
+    x/xw map + 11
+    p ((v >> 10)& 0x3ff)
+    ```
+* MapPrint@objects-printer.cc 函数负责打印对象的 Map
+  
 ### 试验方法
   ```bash
     tools/dev/gm.py x64.debug
@@ -106,6 +122,9 @@
     # Name: hash(4)
     # String: length(4), 这里的 length 返回的是 int32_t, 不想 FixedArray 一样是 Smi。是因为基类是 PrimitiveHeapObject 的缘故吗？
     # 由此可以看到 hash 是 0x0c0001ec, 长度是 3
+    # 而字符串最终都是一个字符或者两个字符的, 从 TorqueGeneratedSeqOneByteString/TorqueGeneratedSeqTwoByteString 可以看到起内存布局: map(4) + hash(4) + len(4) + 具体数据(char_offset)
+    (gdb) x10sb 0x22c7082d2591 + 11 # 显示数据的前 3 个字节
+    0x22c708042252: "123"
     (gdb) # 查看其 Map 的 instance_size 和 inobject properties start offset in word
     (gdb) x/4ub 0x22c70804224d + 3
     0x22c708042250:	0	185	0	61

@@ -28,6 +28,17 @@ class Isolate;
 // The actual implementations of generation of builtins and handlers is in
 // setup-builtins-internal.cc and setup-interpreter-internal.cc, and is
 // linked in by the latter two Delegate implementations.
+//
+// 这个类是初始化组件的一个抽象层, 负责从 snapshot 中反序列化或者从头创建.
+// 当前这包含 builtins 和解析器字节码处理器.
+// 在链接时有两种实现可以选择:
+// - setup-isolate-deserialize.cc: 总是从 snapshot 加载
+// - setup-isolate-full.cc: 从 snapshot 加载或者从头引导, 由 create_heap_objects
+// 控制 setup-isolate-for-tests.cc 实现可以用于测试以强制指定 setup-isolate-full.cc
+// 的运行期行为
+//
+// 生成 builtins 和 handlers 的实现在 setup-builtins-internal.cc 和
+// setup-interpreter-internal.cc 中, 然后在稍后的两个托管实现中进行链接
 class V8_EXPORT_PRIVATE SetupIsolateDelegate {
  public:
   explicit SetupIsolateDelegate(bool create_heap_objects)

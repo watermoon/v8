@@ -416,6 +416,7 @@ class BytecodeGenerator final : public AstVisitor<BytecodeGenerator> {
 
   // Returns a cached slot, or create and cache a new slot if one doesn't
   // already exists.
+  // 返回一个缓存槽, 或者创建并缓存一个新的槽
   FeedbackSlot GetCachedLoadGlobalICSlot(TypeofMode typeof_mode,
                                          Variable* variable);
   FeedbackSlot GetCachedStoreGlobalICSlot(LanguageMode language_mode,

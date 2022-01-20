@@ -4,53 +4,53 @@
   * Smi: [31 bit signed int] 0
   * TaggedIndex
   * HeapObject: [32 bit direct pointer] (4 字节对齐) | 01
-      * JSReceiver
-        * JSObject
-          * JSArray
-          * JSFunctionOrBoundFunction
-              * JSBoundFunction
-              * JSFunction
-          * JSRegExp
-        * JSProxy
-      * FixedArrayBase
-        * ByteArray
-        * BytecodeArray
-        * FixedArray
-          * FrameArray
-          * HashTable
-              * Dictionary
-              * StringTable
-              * StringSet
-              * CompilationCacheTable
-          * FeedbackMetadata
-      * PrimitiveHeapObject
-        * BigInt
-        * HeapNumber
-        * Name
-          * String
-            * SeqString         // 堆中连续空间(数组)存储的字符串, 又分单字节和双字节(unicode)
-            * SlicedString      // 采用 offset 和 lenght 切割 parent 字符串的一部分
-            * ConsString        // 采用树形拼接的字符串 first + second
-            * ThinString        // 引用另外一个字符串 actual
-            * ExternalString    // 堆外的字符串, 又分单双字节
-            * InternalizedString  // 固话到 StringTable 的字符串, 类似于字符串常量池
-      * Context
-      * DescriptorArray
-      * PropertyArray
-      * Code
-      * AbstractCode, Code 或者 BytecodeArray 的 wrapper
-      * Map
-      * Struct
-        * AccessorInfo
-        * Script
-        * StackFrameInfo
-        * CodeCache
-        * Microtask
-          * CallbackTask
-        * Module
-          * SourceTextModule
-      * FeedbackVector
-      * UncompiledData
+    * JSReceiver
+      * JSObject
+        * JSArray
+        * JSFunctionOrBoundFunction
+          * JSBoundFunction
+          * JSFunction
+        * JSRegExp
+      * JSProxy
+    * FixedArrayBase
+      * ByteArray
+      * BytecodeArray
+      * FixedArray
+        * FrameArray
+        * HashTable
+          * Dictionary
+          * StringTable
+          * StringSet
+          * CompilationCacheTable
+        * FeedbackMetadata
+    * PrimitiveHeapObject
+      * BigInt
+      * HeapNumber
+      * Name
+        * String
+          * SeqString         // 堆中连续空间(数组)存储的字符串, 又分单字节和双字节(unicode)
+          * SlicedString      // 采用 offset 和 lenght 切割 parent 字符串的一部分
+          * ConsString        // 采用树形拼接的字符串 first + second
+          * ThinString        // 引用另外一个字符串 actual
+          * ExternalString    // 堆外的字符串, 又分单双字节
+          * InternalizedString  // 固话到 StringTable 的字符串, 类似于字符串常量池
+    * Context
+    * DescriptorArray
+    * PropertyArray
+    * Code
+    * AbstractCode, Code 或者 BytecodeArray 的 wrapper
+    * Map
+    * Struct
+      * AccessorInfo
+      * Script
+      * StackFrameInfo
+      * CodeCache
+      * Microtask
+        * CallbackTask
+      * Module
+        * SourceTextModule
+    * FeedbackVector
+    * UncompiledData
 
 ### 具体类
 * Object: Object 是一个 Smi 或者一个强引用的 HeapObject, 定义了一堆的基础方法和静态方法. Object 的大小是 0 字节(没有数据)

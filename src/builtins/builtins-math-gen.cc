@@ -108,29 +108,18 @@ namespace internal {
 
         TNode<Object> oStr = maybe_string.value();
         GotoIf(TaggedIsSmi(oStr), &not_string);
-        PrintF("not smi");
-        Print("Not smi");
+
         TNode<String> heapStr = CAST(oStr);
-        GotoIfNot(IsString(heapStr), &not_string);
-        // int len = 0;
-        // auto tm = heapStr.ToCString(DISALLOW_NULLS, FAST_STRING_TRAVERSAL, &len);
-        PrintF("is string");
-        Print("Is string");
-
-        Print("### ===============###\n");
-        // TNode<Object> obj = UncheckedCast<Object>(heapStr);
-        // Object object = maybe_string.GetHeapObjectOrSmi();
-        std::ostringstream os;
-        // maybe_string.Print(os);
-        const char* tmp = (const char*)(&heapStr);
-        os << maybe_string << "###" << heapStr << " | " << tmp;
-        for (int i = 0; i < 128; ++i) {
-            char t[32] = {0};
-            sprintf(t, "%d=%c\n", i, tmp[i]);
-            Print(t);
+        Print(heapStr);
+        const char* addr = (const char*)&heapStr;
+        printf("\naddr\n");
+        for (int i = 0; i < 8; i++) {
+          char tmp[32] = {0};
+          const char* p = addr + i * 4;
+          snprintf(tmp, 9, "%d=0x%x%x%x%x\n", i, p[0], p[1], p[2], p[3]);
+          Print(tmp);
         }
-
-        Print(os.str().c_str());
+        GotoIfNot(IsString(heapStr), &not_string);
 
         Return(LoadStringLengthAsSmi(heapStr));
 

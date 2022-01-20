@@ -43,6 +43,7 @@ class Interpreter {
   // Creates a compilation job which will generate bytecode for |literal|.
   // Additionally, if |eager_inner_literals| is not null, adds any eagerly
   // compilable inner FunctionLiterals to this list.
+  // 为 |literal| 创建用于生成字节码的编译工作
   static std::unique_ptr<UnoptimizedCompilationJob> NewCompilationJob(
       ParseInfo* parse_info, FunctionLiteral* literal,
       AccountingAllocator* allocator,
@@ -50,6 +51,7 @@ class Interpreter {
 
   // Creates a compilation job which will generate source positions for
   // |literal| and when finalized, store the result into |existing_bytecode|.
+  // 为 |literal| 创建用于生成代码位置的编译工作, 保存到 |existing_bytecode|
   static std::unique_ptr<UnoptimizedCompilationJob>
   NewSourcePositionCollectionJob(ParseInfo* parse_info,
                                  FunctionLiteral* literal,
@@ -58,6 +60,8 @@ class Interpreter {
 
   // If the bytecode handler for |bytecode| and |operand_scale| has not yet
   // been loaded, deserialize it. Then return the handler.
+  // 如果 |bytecode| 和 |operand_scale| 的字节码 handler 还没加载, 则反序列它,
+  // 然后返回 handler. operand_scale 指字节码的操作范围, 有单、双、4 字节三种
   V8_EXPORT_PRIVATE Code GetBytecodeHandler(Bytecode bytecode,
                                             OperandScale operand_scale);
 

@@ -306,6 +306,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
   }
 
   // Entering JavaScript.
+  // 进入 JavaScript
   VMState<JS> state(isolate);
   CHECK(AllowJavascriptExecution::IsAllowed(isolate));
   if (!ThrowOnJavascriptExecution::IsAllowed(isolate)) {
@@ -320,6 +321,7 @@ V8_WARN_UNUSED_RESULT MaybeHandle<Object> Invoke(Isolate* isolate,
     return isolate->factory()->undefined_value();
   }
 
+  // 执行
   if (params.execution_target == Execution::Target::kCallable) {
     Handle<Context> context = isolate->native_context();
     if (!context->script_execution_callback().IsUndefined(isolate)) {

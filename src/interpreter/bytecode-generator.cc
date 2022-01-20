@@ -34,13 +34,15 @@ namespace interpreter {
 // Scoped class tracking context objects created by the visitor. Represents
 // mutations of the context chain within the function body, allowing pushing and
 // popping of the current {context_register} during visitation.
+// Scoped 类跟踪 visitor 创建的上下文对象. 表示函数体内的上下文链的变化, 允许在
+// 在访问过程中压入和弹出当前上下文寄存器 {context_register}
 class BytecodeGenerator::ContextScope {
  public:
   ContextScope(BytecodeGenerator* generator, Scope* scope)
       : generator_(generator),
         scope_(scope),
-        outer_(generator_->execution_context()),
-        register_(Register::current_context()),
+        outer_(generator_->execution_context()),  // 执行上下文
+        register_(Register::current_context()),   // 寄存器上下文
         depth_(0) {
     DCHECK(scope->NeedsContext() || outer_ == nullptr);
     if (outer_) {
@@ -99,6 +101,7 @@ class BytecodeGenerator::ContextScope {
 
 // Scoped class for tracking control statements entered by the
 // visitor. The pattern derives AstGraphBuilder::ControlScope.
+// Scoped 类跟踪 visitor 进入的控制语句. 模式继承了 AstrGraphBuilder::ControlScope
 class BytecodeGenerator::ControlScope {
  public:
   explicit ControlScope(BytecodeGenerator* generator)
@@ -1284,7 +1287,7 @@ void BytecodeGenerator::GenerateBytecode(uintptr_t stack_limit) {
   DisallowHandleAllocation no_handles;
   DisallowHandleDereference no_deref;
 
-  InitializeAstVisitor(stack_limit);
+  InitializeAstVisitor(stack_limit);  // 设置 stack_limit
 
   // Initialize the incoming context.
   ContextScope incoming_context(this, closure_scope());
@@ -1295,19 +1298,28 @@ void BytecodeGenerator::GenerateBytecode(uintptr_t stack_limit) {
   RegisterAllocationScope register_scope(this);
 
   AllocateTopLevelRegisters();
+  // 分配顶层寄存器 incoming_new_target_or_generator_
 
+  // 设置一个代码起始位置
   builder()->EmitFunctionStartSourcePosition(
       info()->literal()->start_position());
 
+  // 如果代码可以被挂起, 则构建生成器序言
   if (info()->literal()->CanSuspend()) {
     BuildGeneratorPrologue();
   }
 
+  // 是否需要上下文初始化: 需要 scoped, 并且不是脚本和模块 scope
   if (NeedsContextInitialization(closure_scope())) {
     // Push a new inner context scope for the function.
+    // 为函数压入一个新的 inner 上下文域
+
+    // 根据类型(eval/function)创建构造对应的上下文字节码(有 slot_cnt)
     BuildNewLocalActivationContext();
     ContextScope local_function_context(this, closure_scope());
+    // 构建初始化 context 的字节码, 拷贝参数到 context 里去(如有必要)
     BuildLocalActivationContextInitialization();
+    // 构造 body
     GenerateBytecodeBody();
   } else {
     GenerateBytecodeBody();
@@ -1319,6 +1331,7 @@ void BytecodeGenerator::GenerateBytecode(uintptr_t stack_limit) {
 
 void BytecodeGenerator::GenerateBytecodeBody() {
   // Build the arguments object if it is used.
+  // 构造参数对象
   VisitArgumentsObject(closure_scope()->arguments());
 
   // Build rest arguments array if it is used.
@@ -1396,6 +1409,7 @@ void BytecodeGenerator::AllocateTopLevelRegisters() {
   if (IsResumableFunction(info()->literal()->kind())) {
     // Either directly use generator_object_var or allocate a new register for
     // the incoming generator object.
+    // 直接使用 generator_object_var 或者为进来的生成器分配一个新的寄存器
     Variable* generator_object_var = closure_scope()->generator_object_var();
     if (generator_object_var->location() == VariableLocation::LOCAL) {
       incoming_new_target_or_generator_ =
@@ -1403,7 +1417,7 @@ void BytecodeGenerator::AllocateTopLevelRegisters() {
     } else {
       incoming_new_target_or_generator_ = register_allocator()->NewRegister();
     }
-  } else if (closure_scope()->new_target_var()) {
+  } else if (closure_scope()->new_target_var()) {  // 闭包类型
     // Either directly use new_target_var or allocate a new register for
     // the incoming new target object.
     Variable* new_target_var = closure_scope()->new_target_var();
@@ -1636,6 +1650,15 @@ void BytecodeGenerator::VisitStatements(
     // Allocate an outer register allocations scope for the statement.
     RegisterAllocationScope allocation_scope(this);
     Statement* stmt = statements->at(i);
+    // 宏在 ast.h
+    // Visitor 函数是通过宏 DEFINE_AST_VISITOR_SUBCLASS_MEMBERS 定义的
+    // GENERATE_AST_VISITOR_SWITCH 一个根据 node 类型进行的大 switch case
+    // 最终会根据 node type 调用 this->impl()->Visit##NodeType(node); 函数
+    // Visit 具体类型节点的函数也是通过宏定义的, 宏是 DECLARE_VISIT, 文件是
+    // bytecode-generator.h(但是具体的节点类型还是在 ast.h)
+    // 例如是 IfStatement* 节点, 那么调用的则是 VisitIfStatement(IfStatement*)
+    // 函数
+    // VisitLiteral
     Visit(stmt);
     if (builder()->RemainderOfBlockIsDead()) break;
   }
@@ -6175,9 +6198,13 @@ void BytecodeGenerator::BuildNewLocalActivationContext() {
   DCHECK_EQ(current_scope(), closure_scope());
 
   // Create the appropriate context.
+  // 创建恰当的上下文: 当前域必须是函数或者 eval 性的域
   DCHECK(scope->is_function_scope() || scope->is_eval_scope());
+  // 槽位数, 干嘛用的呢?
   int slot_count = scope->num_heap_slots() - Context::MIN_CONTEXT_SLOTS;
   if (slot_count <= ConstructorBuiltins::MaximumFunctionContextSlots()) {
+    // 获取常量池入口的 scope_index, 其实是将 scope 插入到常量输入, 返回索引
+    // 然后输出对应的 Context 到 BytecodeArrayBuilder 缓存
     switch (scope->scope_type()) {
       case EVAL_SCOPE:
         builder()->CreateEvalContext(scope, slot_count);
@@ -6189,6 +6216,7 @@ void BytecodeGenerator::BuildNewLocalActivationContext() {
         UNREACHABLE();
     }
   } else {
+    // 创建函数调用
     Register arg = register_allocator()->NewRegister();
     builder()->LoadLiteral(scope).StoreAccumulatorInRegister(arg).CallRuntime(
         Runtime::kNewFunctionContext, arg);

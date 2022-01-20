@@ -184,6 +184,12 @@ class NexusConfig;
 //  - optimized code cell (weak cell or Smi marker)
 // followed by an array of feedback slots, of length determined by the feedback
 // metadata.
+// 一个反馈想想有一个固定的头:
+// - 共享函数信息(包含了反馈元数据)
+// - 调用次数
+// - 运行时 profiler 计数
+// - 已优化的代码单元(cell)? (弱单元或 Smi 标记)
+// 接着是一个反馈槽位的数组, 数组长度在反馈元数据中
 class FeedbackVector
     : public TorqueGeneratedFeedbackVector<FeedbackVector, HeapObject> {
  public:

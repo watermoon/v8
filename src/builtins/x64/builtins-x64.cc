@@ -325,6 +325,8 @@ namespace {
 // or
 //   using JSEntryFunction = GeneratedCode<Address(
 //       Address root_register_value, MicrotaskQueue* microtask_queue)>;
+// 用 C 调用规范来调用. 对应的函数签名是下面的其中一种:
+// 指令搜地址或者微任务队列
 void Generate_JSEntryVariant(MacroAssembler* masm, StackFrame::Type type,
                              Builtins::Name entry_trampoline) {
   Label invoke, handler_entry, exit;
@@ -487,6 +489,7 @@ void Generate_JSEntryVariant(MacroAssembler* masm, StackFrame::Type type,
 }  // namespace
 
 void Builtins::Generate_JSEntry(MacroAssembler* masm) {
+  std::cout << "###Generate_JSEntry\n" << std::endl;
   Generate_JSEntryVariant(masm, StackFrame::ENTRY,
                           Builtins::kJSEntryTrampoline);
 }

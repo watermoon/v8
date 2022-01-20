@@ -12,6 +12,8 @@ Ignition 是一个基于寄存器的解析器, 基于 TurboFan. Ignition 中的�
 Ldar: LoaD Accumulator from Register, 将寄存器加载到累加器, 处理函数 DoLdar
 ```
 
+### 执行字节码
+
 ### 参考资料
 1. [Firing up the Ignition interpreter](https://v8.dev/blog/ignition-interpreter)
 2. [Ignition](https://v8.dev/docs/ignition)

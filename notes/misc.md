@@ -51,3 +51,6 @@
     r --allow_natives_syntax ./test.js > ~/Desktop/out.log # %DebugPrint 重定向到文件 out.log
     # v8 对象的内存结构
     ```
+* gdb 使用 100 个技巧
+
+https://tech-blog.cymetrics.io/posts/maxchiu/turbofan/

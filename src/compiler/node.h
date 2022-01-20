@@ -39,6 +39,9 @@ using NodeId = uint32_t;
 // compilation, e.g. during lowering passes. Other information that needs to be
 // associated with Nodes during compilation must be stored out-of-line indexed
 // by the Node's id.
+// 一个节点是图的基本原语. 节点通过输入/使用链连起来, 否则默认情况下仅包含一个标识数字. 这
+// 个数字用于表明哪一个应用的图和节点可以用来所以越界的(out-of-line)辅助数据, 尤其是瞬时数据
+//
 class V8_EXPORT_PRIVATE Node final {
  public:
   static Node* New(Zone* zone, NodeId id, const Operator* op, int input_count,
@@ -178,6 +181,8 @@ class V8_EXPORT_PRIVATE Node final {
 
   // A link in the use chain for a node. Every input {i} to a node {n} has an
   // associated {Use} which is linked into the use chain of the {i} node.
+  // 节点的使用链. 对节点 {n} 的每一个输入 {i} 都有一个关联的 {Use} 结构体, 这个结构体
+  // 会链接到节点 {i} 的使用链
   struct Use {
     ZoneUsePtr next;
     ZoneUsePtr prev;
@@ -234,6 +239,32 @@ class V8_EXPORT_PRIVATE Node final {
   //
   // Out-of-line storage of input lists is needed if appending an input to
   // a node exceeds the maximum inline capacity.
+  
+  //============================================================================
+  //== 内存布局 =================================================================
+  //============================================================================
+  // v8 使用了内存布局技巧来将 {Node} 对象映射到 {Use} 对象, 反过来也一样
+  // 
+  // {Use} 链接直接在一个 {Node} 前面, 然后是节点, 接着是一个直线输入 {Nodes} 的指针
+  //
+  // 内联 case:
+  // |Use #N  |Use #N-1|...|Use #1  |Use #0  |Node xxxx |I#0|I#1|...|I#N-1|I#N|
+  //          ^                              ^                  ^
+  //          + Use                          + Node             + Input
+  //
+  // 由于每个 {Use} 实例记录了它的 {input_index}, 因此指针演算可以计算 {Node}
+  //
+  // 外联 case:
+  // out-of-line case:
+  //     |Node xxxx |
+  //     ^       + outline ------------------+
+  //     +----------------------------------------+
+  //                                         |    |
+  //                                         v    | node
+  // |Use #N  |Use #N-1|...|Use #1  |Use #0  |OOL xxxxx |I#0|I#1|...|I#N-1|I#N|
+  //          ^                                                 ^
+  //          + Use                                             + Input
+  //
 
   Node(NodeId id, const Operator* op, int inline_count, int inline_capacity);
   Node(const Node&) = delete;

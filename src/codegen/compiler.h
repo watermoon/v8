@@ -249,6 +249,10 @@ class V8_EXPORT_PRIVATE CompilationJob {
 //  2) FinalizeJob:  Runs on main thread. No dependency changes.
 //
 // Either of phases can either fail or succeed.
+// 未优化的编译作业, 分成按顺序调用的两步:
+// 1) 执行作业: 并行运行
+// 2) 完成作业
+// 任一步骤都会失败
 class UnoptimizedCompilationJob : public CompilationJob {
  public:
   UnoptimizedCompilationJob(uintptr_t stack_limit, ParseInfo* parse_info,
@@ -320,6 +324,10 @@ class UnoptimizedCompilationJob : public CompilationJob {
 //  3) FinalizeJob:  Runs on main thread. No dependency changes.
 //
 // Each of the three phases can either fail or succeed.
+// 优化后编译作业, 分成顺序执行的三步:
+// 1) 准备作业: 主线程运行
+// 2) 执行作业: 可以并行运行
+// 3) 完成作业: 主线程运行
 class OptimizedCompilationJob : public CompilationJob {
  public:
   OptimizedCompilationJob(OptimizedCompilationInfo* compilation_info,

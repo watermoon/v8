@@ -38,6 +38,7 @@ class SourceCodeCache final {
 
 // The Boostrapper is the public interface for creating a JavaScript global
 // context.
+// 创建 Javascript 全局上下文
 class Bootstrapper final {
  public:
   static void InitializeOncePerProcess();

@@ -34,7 +34,12 @@ namespace internal {
 //
 // Note: The implementation is inherently not thread safe. Do not use
 // from multi-threaded code.
-
+//
+// Zone 支持非常开的小块内存分配. 块不能独立释放, 不过 Zone 支持在一个快操作
+// 中释放所有的块.
+// Zone 用于保存临时的数据结构, 例如 AST, 在编译后会释放
+//
+// 注意: 不需要初始化 Zone, 非线程安全
 class V8_EXPORT_PRIVATE Zone final {
  public:
   Zone(AccountingAllocator* allocator, const char* name,
@@ -239,6 +244,7 @@ class V8_EXPORT_PRIVATE Zone final {
 
 // ZoneObject is an abstraction that helps define classes of objects
 // allocated in the Zone. Use it as a base class; see ast.h.
+// ZoneObjec: Zone 中分配对象所属类的基类. 即这些对象都是在 Zone 中分配的
 class ZoneObject {
  public:
   // The accidential old-style pattern

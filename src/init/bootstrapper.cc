@@ -1391,6 +1391,7 @@ static void InstallError(
 
 // This is only called if we are not using snapshots.  The equivalent
 // work in the snapshot case is done in HookUpGlobalObject.
+// 只有在不使用 snapshots 才会调到这个函数, snapshot 中的对应函数是 HookUpGlobalObject
 void Genesis::InitializeGlobal(Handle<JSGlobalObject> global_object,
                                Handle<JSFunction> empty_function) {
   // --- N a t i v e   C o n t e x t ---
@@ -2631,6 +2632,8 @@ void Genesis::InitializeGlobal(Handle<JSGlobalObject> global_object,
     Handle<JSObject> math =
         factory->NewJSObject(isolate_->object_function(), AllocationType::kOld);
     JSObject::AddProperty(isolate_, global, "Math", math, DONT_ENUM);
+    SimpleInstallFunction(isolate_, math, "is42", Builtins::kMathIs42, 1, true);
+    SimpleInstallFunction(isolate_, math, "len", Builtins::kGetStringLen, 1, true);
     SimpleInstallFunction(isolate_, math, "abs", Builtins::kMathAbs, 1, true);
     SimpleInstallFunction(isolate_, math, "acos", Builtins::kMathAcos, 1, true);
     SimpleInstallFunction(isolate_, math, "acosh", Builtins::kMathAcosh, 1,
