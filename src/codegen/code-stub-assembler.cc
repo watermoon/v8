@@ -9366,6 +9366,7 @@ TNode<HeapObject> CodeStubAssembler::LoadFeedbackVector(
   // If the closure doesn't have a feedback vector allocated yet, return
   // undefined. FeedbackCell can contain Undefined / FixedArray (for lazy
   // allocations) / FeedbackVector.
+  // 如果闭包没有分配一个反馈向量, 返回 undefined. FeedbackCell 可以包含 undefined/fixedarray/feedbackvector
   GotoIf(IsFeedbackVector(maybe_vector.value()), &done);
 
   // In all other cases return Undefined.

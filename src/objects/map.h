@@ -119,7 +119,7 @@ using MapHandles = std::vector<Handle<Map>>;
 // +---------------+------------------------------------------------+
 // | Int           | The first int field                            |
 //  `---+----------+------------------------------------------------+
-//      | Byte     | [instance_size]                                |
+//      | Byte     | [instance_size]                                |  // 实例的大小, 单位是 word; 0 表示是变长的, 例如 String 的 map
 //      +----------+------------------------------------------------+
 //      | Byte     | If Map for a primitive type:                   |
 //      |          |   native context index for constructor fn      |
@@ -161,7 +161,7 @@ using MapHandles = std::vector<Handle<Map>>;
 // |               |   - is_dictionary_map (bit 21)                 |
 // |               |   - owns_descriptors (bit 22)                  |
 // |               |   - is_in_retained_map_list (bit 23)           |
-// |               |   - is_deprecated (bit 24)                     |
+// |               |   - is_deprecated (bit 24)                     |  // map 是否已废弃
 // |               |   - is_unstable (bit 25)                       |
 // |               |   - is_migration_target (bit 26)               |
 // |               |   - is_extensible (bit 28)                     |

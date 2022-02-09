@@ -1032,12 +1032,31 @@ static void AdvanceBytecodeOffsetOrReturn(MacroAssembler* masm,
 //
 // The function builds an interpreter frame.  See InterpreterFrameConstants in
 // frames.h for its layout.
+//
+// 为通过解析器进入一个 JS 函数生成代码.
+// 在函数的入口, receiver 和参数已经从左到右压倒了堆栈里.
+// 
+// 寄存器现场是:
+// rax: 实际的参数数量(不包含 receiver)
+// rdi: 被调用的 JS 函数对象
+// rdx: 进入的新 target 或者生成器对象
+// rsi: 我们的上限文
+// rbp: 调用者的栈指针
+// rsp: 栈指针(指向返回地址)
+//
+// 这个函数构建了一个解析器栈帧. 栈帧布局可以在 frames.h 的 InterpreterFrameConstants
+// 查看.
+// 这看着有点像 CSA 代码
+// __ 宏扩展后变成 masm->
 void Builtins::Generate_InterpreterEntryTrampoline(MacroAssembler* masm) {
   Register closure = rdi;
   Register feedback_vector = rbx;
+  // __ Trap();
+  // Comment("Generate_InterpreterEntryTrampoline");
 
   // Get the bytecode array from the function object and load it into
   // kInterpreterBytecodeArrayRegister.
+  // 从函数对象获取字节码数组, 加载到 kInterpreterBytecodeArrayRegister
   __ LoadTaggedPointerField(
       kScratchRegister,
       FieldOperand(closure, JSFunction::kSharedFunctionInfoOffset));
@@ -1049,12 +1068,14 @@ void Builtins::Generate_InterpreterEntryTrampoline(MacroAssembler* masm) {
 
   // The bytecode array could have been flushed from the shared function info,
   // if so, call into CompileLazy.
+  // 字节码数组可能已经从 shared 函数信息中冲洗调, 如果这样, 则调用 CompileLazy(延迟编译)
   Label compile_lazy;
   __ CmpObjectType(kInterpreterBytecodeArrayRegister, BYTECODE_ARRAY_TYPE,
                    kScratchRegister);
   __ j(not_equal, &compile_lazy);
 
   // Load the feedback vector from the closure.
+  // 从闭包中加载反馈向量
   __ LoadTaggedPointerField(
       feedback_vector, FieldOperand(closure, JSFunction::kFeedbackCellOffset));
   __ LoadTaggedPointerField(feedback_vector,
@@ -1063,18 +1084,22 @@ void Builtins::Generate_InterpreterEntryTrampoline(MacroAssembler* masm) {
   Label push_stack_frame;
   // Check if feedback vector is valid. If valid, check for optimized code
   // and update invocation count. Otherwise, setup the stack frame.
+  // 检查反馈向量是否合法. 如果合法, 再检查是否有优化的代码, 并且更新调用次数. 否则,
+  // 创建栈帧
   __ LoadTaggedPointerField(
       rcx, FieldOperand(feedback_vector, HeapObject::kMapOffset));
   __ CmpInstanceType(rcx, FEEDBACK_VECTOR_TYPE);
   __ j(not_equal, &push_stack_frame);
 
   // Read off the optimization state in the feedback vector.
+  // 读出反馈向量中的优化状态
   Register optimization_state = rcx;
   __ movl(optimization_state,
           FieldOperand(feedback_vector, FeedbackVector::kFlagsOffset));
 
   // Check if there is optimized code or a optimization marker that needs to be
   // processed.
+  // 检查是否存在已优化的代码, 或者存在一个需要处理的的待优化标记
   Label has_optimized_code_or_marker;
   __ testl(
       optimization_state,
@@ -1085,6 +1110,7 @@ void Builtins::Generate_InterpreterEntryTrampoline(MacroAssembler* masm) {
   __ bind(&not_optimized);
 
   // Increment invocation count for the function.
+  // 增加函数的调用次数
   __ incl(
       FieldOperand(feedback_vector, FeedbackVector::kInvocationCountOffset));
 

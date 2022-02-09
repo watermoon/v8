@@ -243,14 +243,23 @@ static bool IsSuitableForOnStackReplacement(Isolate* isolate,
   // context and optimize a closure from a different native context. So check if
   // there is a feedback vector before OSRing. We don't expect this to happen
   // often.
+  // 当前 OSR 触发机制是绑定到字节码数组的. 所以可能出现标记闭包(函数以优化)在一个 native
+  // context 进行, 然后在另外一个 native context 进行优化的可能. 所以在进行 OSR 前先检查是否存在
+  // 反向量。 我们不期望这个经常发生
   if (!function->has_feedback_vector()) return false;
   // If we are trying to do OSR when there are already optimized
   // activations of the function, it means (a) the function is directly or
   // indirectly recursive and (b) an optimized invocation has been
   // deoptimized so that we are currently in an unoptimized activation.
   // Check for optimized activations of this function.
+  // 如果我们尝试进行 OSR 时, 函数已经存在优化激活(activation)过程, 这意味着:
+  // (a) 这个函数是直接或者间接的递归的(有点像函数的重入)
+  // (b) 一次优化激活过程已经被逆优化了, 因此此时我们正处于一个逆优化激活过程中
+  // 检查这个函数的激活过程
   for (JavaScriptFrameIterator it(isolate); !it.done(); it.Advance()) {
     JavaScriptFrame* frame = it.frame();
+    // (a) isolate 上的某一帧找到了同一个函数(即递归了)
+    // (b) frame->is_optimized(): 某一帧类型是 OptimizedFrame, 即当前帧处在被逆优化的链路上了
     if (frame->is_optimized() && frame->function() == *function) return false;
   }
 
@@ -286,6 +295,7 @@ RUNTIME_FUNCTION(Runtime_CompileForOnStackReplacement) {
   DCHECK_EQ(0, args.length());
 
   // Only reachable when OST is enabled.
+  // 只有开启了 OSR 才会到达这里
   CHECK(FLAG_use_osr);
 
   // Determine frame triggering OSR request.
@@ -295,11 +305,13 @@ RUNTIME_FUNCTION(Runtime_CompileForOnStackReplacement) {
 
   // Determine the entry point for which this OSR request has been fired and
   // also disarm all back edges in the calling code to stop new requests.
+  // 为这个 OSR 请求确定入口点, 拆除调用代码的反向边来禁止新的请求
   BailoutId ast_id = DetermineEntryAndDisarmOSRForInterpreter(frame);
   DCHECK(!ast_id.IsNone());
 
   MaybeHandle<Code> maybe_result;
   Handle<JSFunction> function(frame->function(), isolate);
+  // 是否适合 OSR?
   if (IsSuitableForOnStackReplacement(isolate, function)) {
     if (FLAG_trace_osr) {
       CodeTracer::Scope scope(isolate->GetCodeTracer());
@@ -307,6 +319,7 @@ RUNTIME_FUNCTION(Runtime_CompileForOnStackReplacement) {
       function->PrintName(scope.file());
       PrintF(scope.file(), " at AST id %d]\n", ast_id.ToInt());
     }
+    // 调用 ConcurrencyMode::kNotConcurrent 编译
     maybe_result = Compiler::GetOptimizedCodeForOSR(function, ast_id, frame);
 
     // Possibly compile for NCI caching.
@@ -320,6 +333,7 @@ RUNTIME_FUNCTION(Runtime_CompileForOnStackReplacement) {
 
   // Check whether we ended up with usable optimized code.
   Handle<Code> result;
+  // 需要上面的 OSR 判断进去, 且 Compiler::GetOptimizedCodeForOSR 返回非空
   if (maybe_result.ToHandle(&result) &&
       CodeKindIsOptimizedJSFunction(result->kind())) {
     DeoptimizationData data =

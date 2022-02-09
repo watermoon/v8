@@ -1075,6 +1075,8 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
   // If compiling for NCI caching only (which does not use the optimization
   // marker), don't touch the marker to avoid interfering with Turbofan
   // compilation.
+  // 确保已经清除了函数上的优化标记, 以防我们不会对代码进行重优化
+  // 如果编译仅为了 NCI 缓存(不使用优化标记), 不会设置标记, 以避免涉及 Turbofan 编译
   if (UsesOptimizationMarker(code_kind) && function->HasOptimizationMarker()) {
     function->ClearOptimizationMarker();
   }
@@ -1084,6 +1086,7 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
     return {};
   }
 
+  // 需要支持调试, 则不进行优化
   // Do not optimize when debugger needs to hook into every call.
   if (isolate->debug()->needs_check_on_function_call()) return {};
 
@@ -1092,6 +1095,7 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
 
   // Do not use TurboFan if optimization is disabled or function doesn't pass
   // turbo_filter.
+  // 禁用了优化
   if (!FLAG_opt || !shared->PassesFilter(FLAG_turbo_filter)) return {};
 
   // If code was pending optimization for testing, remove the entry from the
@@ -1101,6 +1105,7 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
   }
 
   // Check the optimized code cache (stored on the SharedFunctionInfo).
+  // 检查已优化代码缓存
   if (CodeKindIsStoredInOptimizedCodeCache(code_kind)) {
     Handle<Code> cached_code;
     if (GetCodeFromOptimizedCodeCache(function, osr_offset, code_kind)
@@ -1112,11 +1117,13 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
   }
 
   // Reset profiler ticks, function is no longer considered hot.
+  // 重置 profiler ticks, 函数不再被认为是热函数
   DCHECK(shared->is_compiled());
   function->feedback_vector().set_profiler_ticks(0);
 
   // Check the compilation cache (stored on the Isolate, shared between native
   // contexts).
+  // 检查编译缓存
   if (CodeKindIsNativeContextIndependentJSFunction(code_kind)) {
     DCHECK(osr_offset.IsNone());
     DCHECK(FLAG_turbo_nci_as_midtier || !FLAG_turbo_nci_delayed_codegen ||
@@ -1150,6 +1157,7 @@ MaybeHandle<Code> GetOptimizedCode(Handle<JSFunction> function,
   OptimizedCompilationInfo* compilation_info = job->compilation_info();
 
   // Prepare the job and launch concurrent compilation, or compile now.
+  // 并行编译或者立即编译
   if (mode == ConcurrencyMode::kConcurrent) {
     if (GetOptimizedCodeLater(std::move(job), isolate, compilation_info,
                               code_kind, function)) {

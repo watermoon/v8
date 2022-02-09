@@ -64,7 +64,6 @@ using Label = CodeStubAssembler::Label;
 //
 // Load literal '0' into the accumulator.
 IGNITION_HANDLER(LdaZero, InterpreterAssembler) {
-  Comment("========= Dispatch");
   TNode<Number> zero_value = NumberConstant(0.0);
   SetAccumulator(zero_value);
   Dispatch();
@@ -117,6 +116,7 @@ IGNITION_HANDLER(LdaTheHole, InterpreterAssembler) {
 // Load True into the accumulator.
 IGNITION_HANDLER(LdaTrue, InterpreterAssembler) {
   SetAccumulator(TrueConstant());
+  Comment("### === LdaTrue\n");
   Dispatch();
 }
 
@@ -509,16 +509,20 @@ IGNITION_HANDLER(StaLookupSlot, InterpreterAssembler) {
 //
 // Calls the LoadIC at FeedBackVector slot <slot> for <object> and the name at
 // constant pool entry <name_index>.
+// 从反馈向量的 <slot> 槽位加载对象 <object> 的名字为常量池中索引为 <name_index> 的属性
 IGNITION_HANDLER(LdaNamedProperty, InterpreterAssembler) {
   TNode<HeapObject> feedback_vector = LoadFeedbackVector();
+  Comment("LdaNamedProperty");
 
-  // Load receiver.
+  // Load receiver. 即 object, 字节码的第一个操作数
   TNode<Object> recv = LoadRegisterAtOperandIndex(0);
 
-  // Load the name and context lazily.
+  // 下面几个参数都搞了个 lambda 函数
+  // Load the name and context lazily. 槽位的索引
   LazyNode<TaggedIndex> lazy_slot = [=] {
     return BytecodeOperandIdxTaggedIndex(2);
   };
+  // 属性名字, 从第一个寄存器加载得到常量池的索引, 然后根据索引从常量池加载属性的名字
   LazyNode<Name> lazy_name = [=] {
     return CAST(LoadConstantPoolEntryAtOperandIndex(1));
   };

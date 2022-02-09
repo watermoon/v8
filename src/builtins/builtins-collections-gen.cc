@@ -1390,6 +1390,7 @@ void CollectionsBuiltinsAssembler::SameValueZeroBigInt(
 void CollectionsBuiltinsAssembler::SameValueZeroHeapNumber(
     TNode<Float64T> key_float, TNode<Object> candidate_key, Label* if_same,
     Label* if_not_same) {
+  Comment("SameValueZeroHeapNumber");
   Label if_smi(this), if_keyisnan(this);
 
   GotoIf(TaggedIsSmi(candidate_key), &if_smi);

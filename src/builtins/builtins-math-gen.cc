@@ -10,12 +10,12 @@
 namespace v8 {
 namespace internal {
     void demo_callback(int a) {
-        PrintF("### demo_callback| a=%d", a);
+        // PrintF("### demo_callback| a=%d", a);
     }
 
     int demo_cppfunc(const char* msg, int id, int* res) {
         // mksnapshot 的时候执行
-        PrintF("### demo_cppfunc| msg=%s id=%d", msg, id);
+        // PrintF("### demo_cppfunc| msg=%s id=%d", msg, id);
         for (int i = 0; i < 3; ++i) {
             demo_callback(id * 10 + i);
         }
@@ -112,7 +112,7 @@ namespace internal {
         TNode<String> heapStr = CAST(oStr);
         Print(heapStr);
         const char* addr = (const char*)&heapStr;
-        printf("\naddr\n");
+        // printf("\naddr\n");
         for (int i = 0; i < 8; i++) {
           char tmp[32] = {0};
           const char* p = addr + i * 4;

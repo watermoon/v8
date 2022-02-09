@@ -42,15 +42,18 @@ void LazyBuiltinsAssembler::MaybeTailCallOptimizedCodeSlot(
     TNode<JSFunction> function, TNode<FeedbackVector> feedback_vector) {
   Label fallthrough(this), may_have_optimized_code(this);
 
+  // 从反馈向量加载优化状态
   TNode<Uint32T> optimization_state =
       LoadObjectField<Uint32T>(feedback_vector, FeedbackVector::kFlagsOffset);
 
   // Fall through if no optimization trigger or optimized code.
+  // (Fall through)落空: 如果没有优化触发器和已优化代码, 则跳过吧
   GotoIfNot(IsSetWord32(
                 optimization_state,
                 FeedbackVector::kHasOptimizedCodeOrCompileOptimizedMarkerMask),
             &fallthrough);
 
+  // 可能有已优化代码
   GotoIfNot(IsSetWord32(
                 optimization_state,
                 FeedbackVector::kHasCompileOptimizedOrLogFirstExecutionMarker),
@@ -58,6 +61,10 @@ void LazyBuiltinsAssembler::MaybeTailCallOptimizedCodeSlot(
 
   // TODO(ishell): introduce Runtime::kHandleOptimizationMarker and check
   // all these marker values there.
+  // TODO: 引入运行时函数 Runtime::kHandleOptimizationMarker 来检查所有这些标记值
+  // marker 相等则调用响应的函数
+  // 检查顺序: 记录首次运行、非并行编译优化、并行编译优化
+  // 三个标记的意义需要了解一下
   TNode<Uint32T> marker =
       DecodeWord32<FeedbackVector::OptimizationMarkerBits>(optimization_state);
   TailCallRuntimeIfMarkerEquals(marker, OptimizationMarker::kLogFirstExecution,
@@ -81,6 +88,7 @@ void LazyBuiltinsAssembler::MaybeTailCallOptimizedCodeSlot(
 
     // Check if the optimized code is marked for deopt. If it is, call the
     // runtime to clear it.
+    // 已优化代码是否标记了逆优化, 是的话清除标记
     TNode<CodeDataContainer> code_data_container =
         CAST(LoadObjectField(optimized_code, Code::kCodeDataContainerOffset));
 
@@ -92,6 +100,7 @@ void LazyBuiltinsAssembler::MaybeTailCallOptimizedCodeSlot(
 
     // Optimized code is good, get it into the closure and link the closure into
     // the optimized functions list, then tail call the optimized code.
+    // 调用已优化的代码
     StoreObjectField(function, JSFunction::kCodeOffset, optimized_code);
     GenerateTailCallToJSCode(optimized_code, function);
 
@@ -121,22 +130,28 @@ void LazyBuiltinsAssembler::CompileLazy(TNode<JSFunction> function) {
   TNode<HeapObject> feedback_cell_value = LoadFeedbackCellValue(function);
 
   // If feedback cell isn't initialized, compile function
+  // 反馈单元未初始化, 编译之
   GotoIf(IsUndefined(feedback_cell_value), &compile_function);
 
   Label use_sfi_code(this);
   // If there is no feedback, don't check for optimized code.
+  // 如果没有反馈(单元), 那么就没必要检查已优化代码了(因为可能不存在)
   GotoIf(HasInstanceType(feedback_cell_value, CLOSURE_FEEDBACK_CELL_ARRAY_TYPE),
          &use_sfi_code);
 
   // If it isn't undefined or fixed array it must be a feedback vector.
+  // 如果反馈安远不是 undefined 或者固定数组, 则一定是一个反馈向量
   CSA_ASSERT(this, IsFeedbackVector(feedback_cell_value));
 
   // Is there an optimization marker or optimized code in the feedback vector?
+  // 反馈向量中存在一个优化标记📌或者已优化的代码？
+  // 所以关键在于这个优化标记啥时候设置? 设置的条件是什么
   MaybeTailCallOptimizedCodeSlot(function, CAST(feedback_cell_value));
   Goto(&use_sfi_code);
 
   BIND(&use_sfi_code);
   // If not, install the SFI's code entry and jump to that.
+  // 如果不存在, 设置/安装 SFI(shared function info)的代码入口, 然后跳转到那里
   CSA_ASSERT(this, TaggedNotEqual(sfi_code, HeapConstant(BUILTIN_CODE(
                                                 isolate(), CompileLazy))));
   StoreObjectField(function, JSFunction::kCodeOffset, sfi_code);

@@ -17,6 +17,7 @@ namespace internal {
 
 // Common base class for platform-specific TurboAssemblers containing
 // platform-independent bits.
+// 平台相关的 TurboAssemblers 包含一些平台无关位的公共基类
 class V8_EXPORT_PRIVATE TurboAssemblerBase : public Assembler {
  public:
   // Constructors are declared public to inherit them in derived classes

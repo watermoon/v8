@@ -33,6 +33,7 @@ enum class FeedbackSlotKind : uint8_t {
   kInvalid,
 
   // Sloppy kinds come first, for easy language mode testing.
+  // 宽松类型优先
   kStoreGlobalSloppy,
   kStoreNamedSloppy,
   kStoreKeyedSloppy,
@@ -158,6 +159,8 @@ class FeedbackMetadata;
 // when creating closures from a function. This is created once the function is
 // compiled and is either held by the feedback vector (if allocated) or by the
 // FeedbackCell of the closure.
+// 从一个函数创建闭包时会用到的反馈单元格. 函数编译的时候回创建一次, 被反馈向量持有或者被闭包的
+// FeedbackCell 持有
 class ClosureFeedbackCellArray : public FixedArray {
  public:
   NEVER_READ_ONLY_SPACE
@@ -184,7 +187,7 @@ class NexusConfig;
 //  - optimized code cell (weak cell or Smi marker)
 // followed by an array of feedback slots, of length determined by the feedback
 // metadata.
-// 一个反馈想想有一个固定的头:
+// 一个反馈向量有一个固定的头:
 // - 共享函数信息(包含了反馈元数据)
 // - 调用次数
 // - 运行时 profiler 计数
@@ -493,6 +496,9 @@ class SharedFeedbackSlot {
 // of int32 data. The length is never stored - it is always calculated from
 // slot_count. All instances are created through the static New function, and
 // the number of slots is static once an instance is created.
+// FeedbackMetadata 是一个类似数组一样的对象, 有一个槽位计数(表示有多少个槽位被存储着).
+// 我们通过将几个槽位打包进一个 int32 数据中来节省空间. 长度不会存储, 而是通过 slot_count
+// 来计算. 所有的实例都是通过静态的 New 函数来创建, 实例一旦创建后槽位的数量就固定了.
 class FeedbackMetadata : public HeapObject {
  public:
   DECL_CAST(FeedbackMetadata)
@@ -510,6 +516,7 @@ class FeedbackMetadata : public HeapObject {
   inline int32_t synchronized_slot_count() const;
 
   // Returns number of feedback vector elements used by given slot kind.
+  // 返回指定槽位类型所使用的反馈向量元素个数
   static inline int GetSlotSize(FeedbackSlotKind kind);
 
   bool SpecDiffersFrom(const FeedbackVectorSpec* other_spec) const;
@@ -635,6 +642,10 @@ class FeedbackMetadataIterator {
 // Reads of vector  "Live"               Cached after initial read
 // Thread safety    Exclusive write,     Shared read only
 //                  shared read
+// NexusConig 维系 FeedbackNexus 在主线程和后台线程使用的关系.
+// 控制则底层反馈向量实际上的读和写, 管理句柄的创建, 表示主线程和后台线程中不同上下
+// 文下的可用(读写)能力.
+// 主线程: 读写; 后台线程只读
 class V8_EXPORT_PRIVATE NexusConfig {
  public:
   static NexusConfig FromMainThread(Isolate* isolate) {

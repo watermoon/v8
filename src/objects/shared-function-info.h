@@ -170,6 +170,7 @@ class InterpreterData : public Struct {
 
 // SharedFunctionInfo describes the JSFunction information that can be
 // shared by multiple instances of the function.
+// SharedFunctionInfo 描述 JS 函数的信息, 可以被多个函数实例共享
 class SharedFunctionInfo : public HeapObject {
  public:
   NEVER_READ_ONLY_SPACE
@@ -195,20 +196,24 @@ class SharedFunctionInfo : public HeapObject {
 
   // Get the abstract code associated with the function, which will either be
   // a Code object or a BytecodeArray.
+  // 函数的抽象代码, 可能是一个 Code 对象或者 BytecodeArray
   inline AbstractCode abstract_code();
 
   // Tells whether or not this shared function info has an attached
   // BytecodeArray.
+  // 只是这个共享函数是否有一个附加的 BytecodeArray
   inline bool IsInterpreted() const;
 
   // Set up the link between shared function info and the script. The shared
   // function info is added to the list on the script.
+  // 建立共享函数信息和脚本的联系. 共享函数信息会被条件到脚本的列表中
   V8_EXPORT_PRIVATE void SetScript(ReadOnlyRoots roots,
                                    HeapObject script_object,
                                    int function_literal_id,
                                    bool reset_preparsed_scope_data = true);
 
   // Layout description of the optimized code map.
+  // 已优化代码图的布局描述符?
   static const int kEntriesStart = 0;
   static const int kContextOffset = 0;
   static const int kCachedCodeOffset = 1;
@@ -230,6 +235,7 @@ class SharedFunctionInfo : public HeapObject {
   inline bool needs_script_context() const;
 
   // End position of this function in the script source.
+  // 这个函数在脚本源代码中的结束位置
   V8_EXPORT_PRIVATE int EndPosition() const;
 
   // Start position of this function in the script source.
@@ -241,14 +247,17 @@ class SharedFunctionInfo : public HeapObject {
 
   // [outer scope info | feedback metadata] Shared storage for outer scope info
   // (on uncompiled functions) and feedback metadata (on compiled functions).
+  // 外域信息(未编译函数)和反馈元数据(已编译函数)的共享存储空间
   DECL_ACCESSORS(raw_outer_scope_info_or_feedback_metadata, HeapObject)
 
   // Get the outer scope info whether this function is compiled or not.
+  // 可以通过判断函数是否有外域信息判断函数是否已编译? 好像不太对, 请看 is_compiled
   inline bool HasOuterScopeInfo() const;
   inline ScopeInfo GetOuterScopeInfo() const;
 
   // [feedback metadata] Metadata template for feedback vectors of instances of
   // this function.
+  // 这个函数的实例的反馈向量的元数据模板
   inline bool HasFeedbackMetadata() const;
   DECL_ACCESSORS(feedback_metadata, FeedbackMetadata)
 
@@ -256,11 +265,16 @@ class SharedFunctionInfo : public HeapObject {
   // flushing, any GC after this call is made could cause the function
   // to become uncompiled. If you need to ensure the function remains compiled
   // for some period of time, use IsCompiledScope instead.
+  // 返回这个函数是否已经被编译过.
+  // 注意: 由于字节码冲洗, 任何在次函数之后的 GC 调用可能会导致这个函数变成未编译的.
+  // 如果你需要保证这个函数保持已编译一段时间, 使用 IsCompiledScope
   inline bool is_compiled() const;
 
   // Returns an IsCompiledScope which reports whether the function is compiled,
   // and if compiled, will avoid the function becoming uncompiled while it is
   // held.
+  // 返回一个 IsCompiledScope, 它会只是函数是否已编译. 并且当它被持有的时候, 可以避免
+  // 函数变成未编译的
   template <typename LocalIsolate>
   inline IsCompiledScope is_compiled_scope(LocalIsolate* isolate) const;
 
@@ -268,12 +282,15 @@ class SharedFunctionInfo : public HeapObject {
   // Use up to 2^16-2 parameters (16 bits of values, where one is reserved for
   // kDontAdaptArgumentsSentinel). The value is only reliable when the function
   // has been compiled.
+  // 函数长度, 通常是声明的参数个数. 仅在函数是已编译的情况下可用
   inline uint16_t length() const;
   inline void set_length(int value);
 
   // [internal formal parameter count]: The declared number of parameters.
   // For subclass constructors, also includes new.target.
   // The size of function's frame is internal_formal_parameter_count + 1.
+  // 声明的参数个数. 对于子类构造函数, 包含了 new.target 的话, 函数的帧大小为:
+  // internal_formal_parameter_count + 1
   DECL_UINT16_ACCESSORS(internal_formal_parameter_count)
 
   // Set the formal parameter count so the function code will be

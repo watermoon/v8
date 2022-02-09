@@ -119,6 +119,10 @@ using BitField64 = BitField<T, shift, size, uint64_t>;
 // To encode boolean data in a smi array you would use:
 //  using BoolComputer = BitSetComputer<bool, 1, kSmiValueSize, uint32_t>;
 //
+// BitSetComputer 是一个模板类, 用于对数组中数量不定的元素进行编解码
+//
+// 为了将 bool 型数据编码进一个 smi 数组, 可以这么使用:
+//  using BoolComputer = BitSetComputer<bool, 1, kSmiValueSize, uint32_t>;
 template <class T, int kBitsPerItem, int kBitsPerWord, class U>
 class BitSetComputer {
  public:
@@ -126,22 +130,27 @@ class BitSetComputer {
   static const int kMask = (1 << kBitsPerItem) - 1;
 
   // The number of array elements required to embed T information for each item.
+  // 嵌入 items 项需要的数组元素个数
   static int word_count(int items) {
     if (items == 0) return 0;
     return (items - 1) / kItemsPerWord + 1;
   }
 
   // The array index to look at for item.
+  // item 所在的数组下标
+  // 注意: 这里和下文的 item 均指第 item 个元素 T
   static int index(int base_index, int item) {
     return base_index + item / kItemsPerWord;
   }
 
   // Extract T data for a given item from data.
+  // 从 data 中提取出 item 的 T 数据
   static T decode(U data, int item) {
     return static_cast<T>((data >> shift(item)) & kMask);
   }
 
   // Return the encoding for a store of value for item in previous.
+  // 存储 T 到位置 item
   static U encode(U previous, int item, T value) {
     int shift_value = shift(item);
     int set_bits = (static_cast<int>(value) << shift_value);

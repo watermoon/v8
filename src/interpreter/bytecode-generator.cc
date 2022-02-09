@@ -1089,6 +1089,7 @@ BytecodeGenerator::BytecodeGenerator(
       catch_prediction_(HandlerTable::UNCAUGHT) {
   DCHECK_EQ(closure_scope(), closure_scope()->GetClosureScope());
   if (info->has_source_range_map()) {
+    // TODO(lgk): block_coverage_builder_ 这个会不会跟代码优化有关?
     block_coverage_builder_ = zone()->New<BlockCoverageBuilder>(
         zone(), builder(), info->source_range_map());
   }
@@ -1399,6 +1400,7 @@ void BytecodeGenerator::GenerateBytecodeBody() {
 
   // Emit an implicit return instruction in case control flow can fall off the
   // end of the function without an explicit return being present on all paths.
+  // 这是传说中的逃逸分析? 不太像
   if (!builder()->RemainderOfBlockIsDead()) {
     builder()->LoadUndefined();
     BuildReturn();

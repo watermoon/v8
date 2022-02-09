@@ -53,4 +53,12 @@
     ```
 * gdb 使用 100 个技巧
 
-https://tech-blog.cymetrics.io/posts/maxchiu/turbofan/
+### 待阅读资料
+1. https://tech-blog.cymetrics.io/posts/maxchiu/turbofan/
+2. [V8 Target-specific Backend Overview](https://picorio-doc.readthedocs.io/en/latest/software/v8.wiki/Understand-V8-backend-architecture.html)
+  * V8 中平台相关的组件, 移植新平台的例子(PPC, MIPS64)
+3. [讲 bytecode 的系列博文](https://www.coderbridge.com/series/817c07dc8e1c46f2b0a604b3b4e195c1/posts/949d53a24cc148efbbe3dac7f3ea0cd3)
+  * 本文本身是 js 代码对应 bytecode 的讲解, 讲得不错(虽不是我想看的)
+  * 总结篇中有一些资料的整理, 值得一看
+4. [V8 Resources](https://mrale.ph/v8/resources.html)
+  * 一个曾经的 V8 开发者, 先 Dart 开发者整理的 V8 资料

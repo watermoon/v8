@@ -28,6 +28,8 @@
                     => GenerateBytecode
                 => UpdateSharedFunctionFlagsAfterCompilation
                 => FinalizeSingleUnoptimizedCompilationJob
+                  => InstallUnoptimizedCode
+                    => 创建 feedback 元数据
               => FinalizeUnoptimizedScriptCompilation
     * ScriptCompiler::CreateCodeCache && StoreInCodeCache # 按需缓存代码
     * Script::Run # 执行脚本
@@ -44,5 +46,4 @@
           * Microtask: JSRunMicrotasksEntry
       => 得到对应的入口函数的 GeneratedCode 对象 stub_entry
         => stub_entry.Call 调用具体的 JS 函数, 即调用函数指针
-    * Builtins::builtin_handle id=71 CompileLazy(编译 test.js 中的 main 函数)
-    * 
+        => 进入汇编了, 线索断了. 最后的线索在 Generate_JSEntry@builtins-x64.cc

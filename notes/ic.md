@@ -14,3 +14,11 @@
 
 ### 调试信息
 * 宏 `V8_TRACE_FEEDBACK_UPDATES`
+
+### Talk[1]
+
+
+### 参考资料
+1. [V8 and How It Listens to You - michael Stanton](https://www.youtube.com/watch?v=u7zRSm8jzvA)
+   * presentator: V8 编译器团队的经理
+   * about ICs and Feedback Vector

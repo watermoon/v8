@@ -33,6 +33,7 @@ namespace interpreter {
 
 class InterpreterAssembler;
 
+// Ignition 设计文档: https://docs.google.com/document/d/11T2CRex9hXxoJwbYqVQ32yIPMh0uouUZLdyrtmMoL44/edit#
 class Interpreter {
  public:
   explicit Interpreter(Isolate* isolate);

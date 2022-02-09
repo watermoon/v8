@@ -304,6 +304,10 @@ constexpr bool kNoArgumentsAdaptor = false;
 // it's possible to add JavaScript-specific useful CodeAssembler "macros"
 // without modifying files in the compiler directory (and requiring a review
 // from a compiler directory OWNER).
+// 基于 CodeAssembler 而提供专门给 JavaScript 的宏汇编器功能. 通过将 JavaScript-isms
+// 从 CodeAssembler 分离开, 使得在不修改 compiler 目录中文件的情况下, 增加 JavaScript
+// 专有的有用 CodeAssembler "宏" 成为可能.
+// 这里的"宏" 改怎么理解呢? - 20220120 by lgk
 class V8_EXPORT_PRIVATE CodeStubAssembler
     : public compiler::CodeAssembler,
       public TorqueGeneratedExportedMacrosAssembler {

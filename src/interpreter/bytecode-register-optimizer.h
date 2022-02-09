@@ -17,6 +17,7 @@ namespace interpreter {
 // registers. The bytecode generator uses temporary registers
 // liberally for correctness and convenience and this stage removes
 // transfers that are not required and preserves correctness.
+// 消除寄存器间不必要转移的优化阶段
 class V8_EXPORT_PRIVATE BytecodeRegisterOptimizer final
     : public NON_EXPORTED_BASE(BytecodeRegisterAllocator::Observer),
       public NON_EXPORTED_BASE(ZoneObject) {

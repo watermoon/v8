@@ -239,7 +239,7 @@ class Code : public HeapObject {
 
   // [next_code_link]: Link for lists of optimized or deoptimized code.
   // Note that this field is stored in the {CodeDataContainer} to be mutable.
-  // 优化/反优化代码的链表
+  // 优化/逆优化代码的链表
   inline Object next_code_link() const;
   inline void set_next_code_link(Object value);
 
@@ -851,7 +851,7 @@ class BytecodeArray : public FixedArrayBase {
 // the literal array will contain these functions.
 //
 // It can be empty.
-// 用于保存已优化代码的反优化数据
+// 用于保存已优化代码的逆优化数据
 class DeoptimizationData : public FixedArray {
  public:
   // Layout description.  Indices in the array.

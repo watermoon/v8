@@ -2667,11 +2667,11 @@ void AccessorAssembler::TryProbeStubCache(StubCache* stub_cache,
 }
 
 //////////////////// Entry points into private implementation (one per stub).
-
+// 私有实现的入口点(每个桩代码一个)
 void AccessorAssembler::LoadIC_BytecodeHandler(const LazyLoadICParameters* p,
                                                ExitPoint* exit_point) {
   // Must be kept in sync with LoadIC.
-
+  // 必须和 LoadIC 保持同步
   // This function is hand-tuned to omit frame construction for common cases,
   // e.g.: monomorphic field and constant loads through smi handlers.
   // Polymorphic ICs with a hit in the first two entries also omit frames.
@@ -2679,13 +2679,20 @@ void AccessorAssembler::LoadIC_BytecodeHandler(const LazyLoadICParameters* p,
   // changes in control flow and logic. We currently have no way of ensuring
   // that no frame is constructed, so it's easy to break this optimization by
   // accident.
+  // 这个函数是手动调优来为一下通用 cases 省略了栈帧的构建, 例如: 通过 smi handler 加载
+  // monomorphic(单态) 字段和常量
+  // 在前两个条目命中的多态 ICs 也省略栈帧
+  // TODO(jgruber): 省略栈帧是很脆弱的, 可能会被控制流或者逻辑中的微小改动影响.
+  // 我们当前没有办法保证没有栈帧被构建, 所以容易在无意中就破坏了这个优化
   Label stub_call(this, Label::kDeferred), miss(this, Label::kDeferred),
       no_feedback(this, Label::kDeferred);
 
-  GotoIf(IsUndefined(p->vector()), &no_feedback);
+  GotoIf(IsUndefined(p->vector()), &no_feedback);  // 没有反馈向量. 即前面 load 的时候没 load 到(返回值是 undefined)
 
+  // 加载 Receiver 的 Map 对象(即 hidden class)
   TNode<Map> lookup_start_object_map =
       LoadReceiverMap(p->receiver_and_lookup_start_object());
+  // Map 已经废弃?
   GotoIf(IsDeprecatedMap(lookup_start_object_map), &miss);
 
   // Inlined fast path.
@@ -2695,6 +2702,7 @@ void AccessorAssembler::LoadIC_BytecodeHandler(const LazyLoadICParameters* p,
     TVARIABLE(MaybeObject, var_handler);
     Label try_polymorphic(this), if_handler(this, &var_handler);
 
+    // 尝试单态模式, 失败就尝试多态
     TNode<MaybeObject> feedback = TryMonomorphicCase(
         p->slot(), CAST(p->vector()), lookup_start_object_map, &if_handler,
         &var_handler, &try_polymorphic);
@@ -2702,6 +2710,7 @@ void AccessorAssembler::LoadIC_BytecodeHandler(const LazyLoadICParameters* p,
     BIND(&if_handler);
     HandleLoadICHandlerCase(p, CAST(var_handler.value()), &miss, exit_point);
 
+    // 尝试多态模式
     BIND(&try_polymorphic);
     {
       TNode<HeapObject> strong_feedback =

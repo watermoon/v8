@@ -2970,6 +2970,7 @@ void TurboAssembler::CallForDeoptimization(Builtins::Name target, int,
   USE(exit, kind);
 }
 
+// 调试相关, 详情请参考 https://github.com/riscv-collab/v8/wiki/How-to-debug-V8
 void TurboAssembler::Trap() { int3(); }
 void TurboAssembler::DebugBreak() { int3(); }
 
