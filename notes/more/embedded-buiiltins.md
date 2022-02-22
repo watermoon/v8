@@ -127,9 +127,10 @@ __asm__(".byte 0x55,0x48,0x89,0xe5,0x6a,0x18,0x48,0x83\n"
 <img src=./isolate-layout-optimized.png style="background-color:white" />
 
 ### 结果
-<img src=./result.png style="background-color:white" />
+<img src=./results.png style="background-color:white" />
 
 消耗从 `c * (1 + n)` (其中 c 是所有 builtins 的内存消耗, n 是 isolate 的数量) 降低到了 `c * 1`
+
 注: 实际上由于离堆 trampoline 的存在, 还是有一些每个 isolate 相关的消耗.
 
 中位数来看, V8 堆内存消耗下降了 19%. 绝对值, 50 分位节省改了 1.9M, 30 分位节省 3.4M, 10 分位节省了 6.5M

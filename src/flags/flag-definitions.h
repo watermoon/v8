@@ -550,6 +550,9 @@ DEFINE_BOOL(trace_migration, false, "trace object migration")
 DEFINE_BOOL(trace_generalization, false, "trace map generalization")
 
 // Flags for TurboProp.
+// TurboProp 标记位📌
+// TurboProp: 一个更快更轻的版本(快指的是编译), 关闭了一些重要优化
+// url: https://medium.com/@yanguly/sparkplug-v8-baseline-javascript-compiler-758a7bc96e84
 DEFINE_BOOL(turboprop, false, "enable experimental turboprop mid-tier compiler")
 DEFINE_BOOL(turboprop_mid_tier_reg_alloc, true,
             "enable mid-tier register allocator for turboprop")
@@ -564,6 +567,8 @@ DEFINE_VALUE_IMPLICATION(turboprop, interrupt_budget, 15 * KB)
 DEFINE_VALUE_IMPLICATION(turboprop, reuse_opt_code_count, 2)
 DEFINE_UINT_READONLY(max_minimorphic_map_checks, 4,
                      "max number of map checks to perform in minimorphic state")
+// Turboprop: 涡轮螺旋桨引擎
+// Turbofan: 涡轮风扇引擎
 // Since Turboprop uses much lower value for interrupt budget, we need to wait
 // for a higher number of ticks to tierup to Turbofan roughly match the default.
 // The default of 10 is approximately the ration of TP to TF interrupt budget.

@@ -120,7 +120,7 @@ bool JSFunction::ActiveTierIsIgnition() const {
 }
 
 bool JSFunction::ActiveTierIsTurbofan() const {
-  CodeKind highest_tier;
+  CodeKind highest_tier;  // 最高等级
   if (!HighestTierOf(GetAvailableCodeKinds(), &highest_tier)) return false;
   return highest_tier == CodeKind::TURBOFAN;
 }

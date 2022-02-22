@@ -25,8 +25,10 @@ class RuntimeProfiler {
   explicit RuntimeProfiler(Isolate* isolate);
 
   // Called from the interpreter when the bytecode interrupt has been exhausted.
+  // 当字节码中断消耗完后, 解析器会调用这个函数
   void MarkCandidatesForOptimizationFromBytecode();
   // Likewise, from generated code.
+  // 类似的, 从生成的代码那里调过来
   void MarkCandidatesForOptimizationFromCode();
 
   void NotifyICChanged() { any_ic_changed_ = true; }
@@ -37,11 +39,13 @@ class RuntimeProfiler {
  private:
   // Make the decision whether to optimize the given function, and mark it for
   // optimization if the decision was 'yes'.
+  // 决定是否优化给定的函数, 如果决定优化则标记它
   void MaybeOptimizeFrame(JSFunction function, JavaScriptFrame* frame,
                           CodeKind code_kind);
 
   // Potentially attempts OSR from and returns whether no other
   // optimization attempts should be made.
+  // 潜在尝试从 OSR(on-stack-replacement)(优化)并且返回是否不应该进行其他的优化尝试
   bool MaybeOSR(JSFunction function, InterpretedFrame* frame);
   OptimizationReason ShouldOptimize(JSFunction function,
                                     BytecodeArray bytecode_array);

@@ -68,13 +68,77 @@ JavaScript Source => JavaScript => Simple => Machine => Scheduler => CodeGen => 
       * OptimizationMarker::kCompileOptimized => Runtime::kCompileOptimized_NotConcurrent
       * OptimizationMarker::kCompileOptimizedConcurrent => Runtime::kCompileOptimized_Concurrent
       * 关键点: 这个标记是在哪里设置的, 设置的条件是什么?
+        * 设置函数 SetOptimizationMarker
 * Runtime::kCompileOptimized_Concurrent/Runtime::kCompileOptimized_NotConcurrent 两个 runtime 函数
   => CompileOptimized @runtime-compiler.cc
     => Compiler::CompileOptimized @compiler.cc
       => v8::internal::GetOptimizedCode @compiler.cc
         => Pipeline::NewCompilationJob
 * Runtime_CompileForOnStackReplacement @runtime-compiler.cc 设置 OptimizationMarker::kCompileOptimized 标记
-  => Compiler::GetOptimizedCodeForOSR
+  => Compiler::GetOptimizedCodeForOSR (会先判断是否适合做 OSR - on stack replacement)
+    => GetOptimizedCode
+* SetOptimizationMarker 设置优化标记, 总共两个地方有这个函数, JSFunction 的调用 feedback_vector 的接口
+  * v8::internal::JSFunction::SetOptimizationMarker @src/objects/js-function.h 判断条件在此
+  * v8::internal::FeedbackVector::SetOptimizationMarker
+* JSFunction::MarkForOptimization @js-function.h 将函数标记为优化编译
+  * 触发 (<= 符号表示调用来源)
+    * Compiler::PostInstantiation
+      <= Factory::JSFunctionBuilder::JSFunctionBuilder
+    * RuntimeProfiler::Optimize (Cautions!!! 热函数判断而来优化?)
+      <= RuntimeProfiler::ShouldOptimize
+        <= RuntimeProfiler::MaybeOptimizeFrame
+          * MaybeOSR: 拦截 ShouldOptimize 调用
+          <= MarkCandidatesForOptimizationFromBytecode <font color=red>调用 SaturatingIncrementProfilerTicks 增加 profiler_tick</font>
+            <= Runtime_BytecodeBudgetInterruptFromBytecode
+              <= InterpreterAssembler::UpdateInterruptBudget -> 解析器执行
+                <= BuildUpdateInterruptBudget
+                  <= BytecodeGraphBuilder 类中, 构建跳转和函数返回的字节码执行图时会调用此函数
+                    * BuildReturn
+                    * BuildJump
+                    * BuildJumpIf
+                    * BuildJumpIfNot
+                    * BuildJumpIfFalse
+                    * BuildJumpIfTrue
+          <= MarkCandidatesForOptimizationFromCode 调用 2
+            <= Runtime_BytecodeBudgetInterruptFromCode
+              <= EffectControlLinearizer::LowerUpdateInterruptBudget
+    * Runtime_OptimizeFunctionOnNextCall
+    * Runtime_OptimizeOsr
+* RuntimerProfiler::ShouldOptimize @src/execution/runtime-profiler.cc 函数是否可优化的条件
+  * 判断是否不需要优化
+    * TurboFan
+    * Turboprop
+  * 根据 profiler 收集的数据判断是否需要优化
+    ```cpp
+    // 注: 通过指令 %OptimizeFunctionOnNextCall() 强行优化后, 再多次执行函数, 被 profiler 判断为热
+    // 函数后依然会进行优化, 原因不明. 测试脚本: test_opt.js
+    // %OptimizeFunctionOnNextCall(add): TurboFan
+    // profiler 热函数: TurboFan-OSR
+
+    // 这个 profiler_ticks 的增加通过 SaturatingIncrementProfilerTicks 接口进行
+    // 执行路径同 ShouldOptimize, 即增加一次执行一次
+    int ticks = function.feedback_vector().profiler_ticks();  // 执行时收集的 tick
+    int scale_factor = function.ActiveTierIsMidtierTurboprop()  // 中层的 Turboprop 优化
+                            ? FLAG_ticks_scale_factor_for_top_tier  // 默认 10
+                            : 1;
+    int ticks_for_optimization =  // 进行优化需要达到的 tick (即条件)
+        kProfilerTicksBeforeOptimization +  // 2
+        (bytecode.length() / kBytecodeSizeAllowancePerTick);  // 1200
+    ticks_for_optimization *= scale_factor;  // 乘以 scale
+    if (ticks >= ticks_for_optimization) {   // 如果 profiler 的 tick 数达到阈值, 表明函数是热函数且稳定
+        return OptimizationReason::kHotAndStable;
+    } else if (!any_ic_changed_ &&  // 小函数优化
+                bytecode.length() < kMaxBytecodeSizeForEarlyOpt) {  // 90
+        // TODO(turboprop, mythria): Do we need to support small function
+        // optimization for TP->TF tier up. If so, do we want to scale the bytecode
+        // size?
+        // If no IC was patched since the last tick and this function is very
+        // small, optimistically optimize it now.
+        return OptimizationReason::kSmallFunction;
+    } else if (FLAG_trace_opt_verbose) {
+        // 打印优化跟踪信息, 指定 flag: --trace_opt
+    }
+    ```
 
 ### Ignition 总体设计
 * 字节码处理程序是用高级的机器架构相关的汇编代码(CSA)写的, 被 TurboFan 编译

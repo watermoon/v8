@@ -22,20 +22,26 @@ namespace internal {
 
 // Number of times a function has to be seen on the stack before it is
 // optimized.
+// 一个函数在被优化前, 需要在栈上被"看到(seen)"的时间
 static const int kProfilerTicksBeforeOptimization = 2;
 
 // The number of ticks required for optimizing a function increases with
 // the size of the bytecode. This is in addition to the
 // kProfilerTicksBeforeOptimization required for any function.
+// 优化一个函数需要的 tick 数随着字节码的长度而增加. 对于任何函数, 这都是除了
+// kProfilerTicksBeforeOptimization 外的额外消耗
 static const int kBytecodeSizeAllowancePerTick = 1200;
 
 // Maximum size in bytes of generate code for a function to allow OSR.
+// 一个函数的生成代码允许进行 OSR(on-stack-replacement)的最大大小
 static const int kOSRBytecodeSizeAllowanceBase = 180;
 
 static const int kOSRBytecodeSizeAllowancePerTick = 48;
 
 // Maximum size in bytes of generated code for a function to be optimized
 // the very first time it is seen on the stack.
+// 一个函数的生成代码第一次在栈上被"看见(seen 即执行)"即进行优化的最大大小
+// 说人话: 小函数首次执行即被优化, 小的判断条件是字节码小于 90 字节
 static const int kMaxBytecodeSizeForEarlyOpt = 90;
 
 // Number of times a function has to be seen on the stack before it is
@@ -226,21 +232,25 @@ bool RuntimeProfiler::MaybeOSR(JSFunction function, InterpretedFrame* frame) {
 
 OptimizationReason RuntimeProfiler::ShouldOptimize(JSFunction function,
                                                    BytecodeArray bytecode) {
-  if (function.ActiveTierIsTurbofan()) {
+  PrintF("ShouldOptimize...\n");
+  if (function.ActiveTierIsTurbofan()) {  // 函数当前等级已经是 Turbofan, 无需优化了
     return OptimizationReason::kDoNotOptimize;
   }
+  // 开启了 turboprop 编译器, 且函数的最高层级优化是 Turboprop, 则也无需优化
   if (V8_UNLIKELY(FLAG_turboprop) && function.ActiveTierIsToptierTurboprop()) {
     return OptimizationReason::kDoNotOptimize;
   }
   int ticks = function.feedback_vector().profiler_ticks();
   int scale_factor = function.ActiveTierIsMidtierTurboprop()
-                         ? FLAG_ticks_scale_factor_for_top_tier
+                         ? FLAG_ticks_scale_factor_for_top_tier  // 默认 10
                          : 1;
   int ticks_for_optimization =
-      kProfilerTicksBeforeOptimization +
-      (bytecode.length() / kBytecodeSizeAllowancePerTick);
-  ticks_for_optimization *= scale_factor;
-  if (ticks >= ticks_for_optimization) {
+      kProfilerTicksBeforeOptimization +  // 2
+      (bytecode.length() / kBytecodeSizeAllowancePerTick);  // 1200
+  ticks_for_optimization *= scale_factor;  // 乘以 scale
+  PrintF("ShouldOptimize| ticks=%d bytecode_size=%d scale_factor=%d ticks_for_optimization=%d\n",
+         ticks, bytecode.length(), scale_factor, ticks_for_optimization);
+  if (ticks >= ticks_for_optimization) {  // 如何 profiler 的 tick 数达到阈值, 表明函数是热函数且稳定
     return OptimizationReason::kHotAndStable;
   } else if (!any_ic_changed_ &&
              bytecode.length() < kMaxBytecodeSizeForEarlyOpt) {
