@@ -577,6 +577,9 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
     // Local<String> 转 v8::internal::Handle<String>
     // 反过来是不是就可以实现之前的问题了呢? refer to api.h
     i::Handle<i::String> str = Utils::OpenHandle(*(source));
+    
+    v8::String::Utf8Value v8Src(isolate, source);
+    fprintf(stderr, "source=%u[%s]\n", v8Src.length(), *v8Src);
 
     // Set up ParseInfo.
     i::UnoptimizedCompileState compile_state(i_isolate);

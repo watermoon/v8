@@ -99,6 +99,7 @@ JavaScript Source => JavaScript => Simple => Machine => Scheduler => CodeGen => 
                     * BuildJumpIfNot
                     * BuildJumpIfFalse
                     * BuildJumpIfTrue
+                    * 为什么都是在这些返回或者跳转的地方, 因为计算 ticker 的 budget 是以执行了多少字节的指令来判断的, 所以在返回/跳转地地方统计就能统计完整
           <= MarkCandidatesForOptimizationFromCode 调用 2
             <= Runtime_BytecodeBudgetInterruptFromCode
               <= EffectControlLinearizer::LowerUpdateInterruptBudget
@@ -139,7 +140,8 @@ JavaScript Source => JavaScript => Simple => Machine => Scheduler => CodeGen => 
         // 打印优化跟踪信息, 指定 flag: --trace_opt
     }
     ```
-
+* 完整的热点函数优化逻辑
+* 
 ### Ignition 总体设计
 * 字节码处理程序是用高级的机器架构相关的汇编代码(CSA)写的, 被 TurboFan 编译
 * 为了被解析器执行, 函数会在初次的未优化编译步骤中被 BytecodeGenerator 翻译成字节码

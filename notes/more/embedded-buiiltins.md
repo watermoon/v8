@@ -100,7 +100,7 @@ __asm__(".byte 0x55,0x48,0x89,0xe5,0x6a,0x18,0x48,0x83\n"
 
 <img src=./code-on-heap.png style="background-color:white;"/>
 
-每一个 builtin 在托管堆中有一个关联的代码对象, 成为 `off-heap trampoline`(离堆蹦蹦床, 即胶水函数). 元数据想标准的代码对象一样保存在 trampoline 中, 但是内联的指令流仅仅包含一个很短的指令: 加载 builtin 真正的地址, 然后跳转过去.
+每一个 builtin 在托管堆中有一个关联的代码对象, 成为 `off-heap trampoline`(离堆蹦蹦床, 即胶水函数). 元数据像标准的代码对象一样保存在 trampoline 中, 但是内联的指令流仅仅包含一个很短的指令: 加载 builtin 真正的地址, 然后跳转过去.
 
 <img src=./code-off-heap.png style="background-color: white" />
 
@@ -122,7 +122,7 @@ __asm__(".byte 0x55,0x48,0x89,0xe5,0x6a,0x18,0x48,0x83\n"
     * builtin 到 builtin 的调用转换成一个相对于 pc 的调用指令. 这个对于运行时生成的 JIT 代码无法实现, 因此此时相对与 pc 的偏移可能超过了最大的 32-bit 值
     * 内联了离堆(off-heap) trampoline 到所有的调用点(call sites), 将调用序列从 6 个指令减少到 2 个指令
 
-这些优化昨晚后, 性能损失被限制到了 0.5% 左右
+这些优化做完后, 性能损失被限制到了 0.5% 左右
 
 <img src=./isolate-layout-optimized.png style="background-color:white" />
 

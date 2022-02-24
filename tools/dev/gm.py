@@ -50,11 +50,11 @@ MODES = ["release", "debug", "optdebug"]
 # Modes that get built/run when you don't specify any.
 DEFAULT_MODES = ["release", "debug"]
 # Build targets that can be manually specified.
-TARGETS = ["d8", "cctest", "unittests", "v8_fuzzers", "wasm_api_tests", "wee8",
+TARGETS = ["d8", "d8s", "cctest", "unittests", "v8_fuzzers", "wasm_api_tests", "wee8",
            "mkgrokdump", "generate-bytecode-expectations", "inspector-test"]
 # Build targets that get built when you don't specify any (and specified tests
 # don't imply any other targets).
-DEFAULT_TARGETS = ["d8"]
+DEFAULT_TARGETS = ["d8",]# "d8s"]  # 默认不编译 d8s 了, 现在先用 d8 来学习, 有时间再抄一遍代码吧
 # Tests that run-tests.py would run by default that can be run with
 # BUILD_TARGETS_TESTS.
 DEFAULT_TESTS = ["cctest", "debugger", "intl", "message", "mjsunit",
@@ -163,6 +163,7 @@ def PrintHelpAndExit():
   sys.exit(0)
 
 def _Call(cmd, silent=False):
+  silent = False
   if not silent: print("# %s" % cmd)
   return subprocess.call(cmd, shell=True)
 

@@ -4742,6 +4742,7 @@ group("gn_all") {
 
   deps = [
     ":d8",
+    ":d8s",
     ":v8_fuzzers",
     ":v8_hello_world",
     ":v8_sample_process",
@@ -4782,7 +4783,7 @@ group("v8_clusterfuzz") {
 group("v8_archive") {
   testonly = true
 
-  deps = [ ":d8" ]
+  deps = [ ":d8", ":d8s" ]
 
   if (!is_win) {
     # On windows, cctest doesn't link with v8_static_library.
@@ -4979,6 +4980,33 @@ v8_executable("d8") {
 
   if (v8_enable_vtunejit) {
     deps += [ "src/third_party/vtune:v8_vtune" ]
+  }
+}
+
+v8_executable("d8s") {
+  sources = [
+    "src/d8s/d8s.cc",
+    "src/d8s/d8s.h",
+  ]
+
+  configs = [
+    # Note: don't use :internal_config here because this target will get
+    # the :external_config applied to it by virtue of depending on :v8, and
+    # you can't have both applied to the same target.
+    ":internal_config_base",
+  ]
+
+  deps = [
+    ":v8",
+    ":v8_libbase",
+    ":v8_libplatform",
+    "//build/win:default_exe_manifest",
+  ]
+
+  if (is_posix || is_fuchsia) {
+    #sources += [ "src/d8/d8-posix.cc" ]
+  } else if (is_win) {
+    #sources += [ "src/d8/d8-windows.cc" ]
   }
 }
 
