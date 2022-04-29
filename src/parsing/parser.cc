@@ -589,6 +589,8 @@ FunctionLiteral* Parser::DoParseProgram(Isolate* isolate, ParseInfo* info) {
     FunctionState function_state(&function_state_, &scope_, scope);
     ScopedPtrList<Statement> body(pointer_buffer());
     int beg_pos = scanner()->location().beg_pos;
+    DLOG("DoParseProgram| begin parse. flags: is_module=%d is_wrapped_as_func=%d is_repl_mode=%d",
+         flags().is_module(), info->is_wrapped_as_function(), flags().is_repl_mode());
     if (flags().is_module()) {
       DCHECK(flags().is_module());
 

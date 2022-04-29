@@ -1682,6 +1682,8 @@ class V8_EXPORT Module : public Data {
  * A compiled JavaScript script, tied to a Context which was active when the
  * script was compiled.
  */
+// 已编译的 JavaScript 脚本, 与脚本在编译时活跃的上下文关联(Context)
+// 脚本根据是否关联上下文, 分为是否绑定的脚本
 class V8_EXPORT Script {
  public:
   /**
@@ -1717,6 +1719,9 @@ class V8_EXPORT ScriptCompiler {
    * = true. The data to cache can then can be retrieved from
    * UnboundScript.
    */
+  // 编译数据, embedder 可以缓存并回传来加速后面的编译. 需要 CompilerOptions 的
+  // produce_data_to_cache 设为 true 并且传输到编译函数. 缓存的数据可以稍后从 UnboundScript
+  // 获取
   struct V8_EXPORT CachedData {
     enum BufferPolicy {
       BufferNotOwned,
@@ -1751,6 +1756,7 @@ class V8_EXPORT ScriptCompiler {
   /**
    * Source code which can be then compiled to a UnboundScript or Script.
    */
+  // 可以被编译成(不绑定)脚本的源代码
   class Source {
    public:
     // Source takes ownership of CachedData.
@@ -3041,6 +3047,7 @@ enum class NewStringType {
   /**
    * Create a new string, always allocating new storage memory.
    */
+  // 创建新的字符串, 通常分配新的内存
   kNormal,
 
   /**
@@ -3048,6 +3055,7 @@ enum class NewStringType {
    * old generation heap space and be deduplicated if an identical string
    * already exists.
    */
+  // 暗示字符串应该在老生代的堆空间进行分配, 并且在存在一样的字符串时进行去重
   kInternalized
 };
 

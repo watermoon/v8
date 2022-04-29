@@ -6,6 +6,9 @@
 #define V8_INIT_V8_H_
 
 #include "src/common/globals.h"
+#define DLOG(fmt, ...) {\
+  fprintf(stdout, "DLOG [%s@L%d] " fmt "\n", __FILE__, __LINE__, ## __VA_ARGS__); \
+}
 
 namespace v8 {
 

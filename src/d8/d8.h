@@ -21,6 +21,9 @@
 #include "src/utils/allocation.h"
 #include "src/utils/utils.h"
 
+#define DLOG(fmt, ...) {\
+  fprintf(stdout, "DLOG [%s@L%d] " fmt "\n", __FILE__, __LINE__, ## __VA_ARGS__); \
+}
 namespace v8 {
 
 class D8Console;

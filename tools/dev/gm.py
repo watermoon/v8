@@ -54,7 +54,7 @@ TARGETS = ["d8", "d8s", "cctest", "unittests", "v8_fuzzers", "wasm_api_tests", "
            "mkgrokdump", "generate-bytecode-expectations", "inspector-test"]
 # Build targets that get built when you don't specify any (and specified tests
 # don't imply any other targets).
-DEFAULT_TARGETS = ["d8",]# "d8s"]  # 默认不编译 d8s 了, 现在先用 d8 来学习, 有时间再抄一遍代码吧
+DEFAULT_TARGETS = ["d8", ]# "d8s"]
 # Tests that run-tests.py would run by default that can be run with
 # BUILD_TARGETS_TESTS.
 DEFAULT_TESTS = ["cctest", "debugger", "intl", "message", "mjsunit",

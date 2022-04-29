@@ -577,9 +577,6 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
     // Local<String> 转 v8::internal::Handle<String>
     // 反过来是不是就可以实现之前的问题了呢? refer to api.h
     i::Handle<i::String> str = Utils::OpenHandle(*(source));
-    
-    v8::String::Utf8Value v8Src(isolate, source);
-    fprintf(stderr, "source=%u[%s]\n", v8Src.length(), *v8Src);
 
     // Set up ParseInfo.
     i::UnoptimizedCompileState compile_state(i_isolate);
@@ -604,7 +601,6 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
           i_isolate, parse_info.ast_value_factory());
       parse_info.pending_error_handler()->ReportErrors(i_isolate, script);
 
-      fprintf(stderr, "Failed parsing\n");
       return false;
     }
     return true;
@@ -625,6 +621,9 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
     Local<Context> context(isolate->GetCurrentContext());
     ScriptOrigin origin(name);  // name 是脚本名字, source 是脚本内容
 
+    v8::String::Utf8Value v8Name(isolate, name);
+    v8::String::Utf8Value v8Src(isolate, source);
+    DLOG("source=%u name=%s content=%s", v8Src.length(), *v8Name, *v8Src);
     if (options.compile_options == ScriptCompiler::kConsumeCodeCache) {
       // 这里的缓存只是 d8 这个程序的缓存
       ScriptCompiler::CachedData* cached_code =
@@ -653,6 +652,7 @@ bool Shell::ExecuteString(Isolate* isolate, Local<String> source,
       maybe_script =
           ScriptCompiler::Compile(context, &streamed_source, source, origin);
     } else {
+      DLOG("before compiling");
       ScriptCompiler::Source script_source(source, origin);
       maybe_script = ScriptCompiler::Compile(context, &script_source,
                                              options.compile_options);

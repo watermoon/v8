@@ -2453,6 +2453,7 @@ MaybeLocal<UnboundScript> ScriptCompiler::CompileUnboundInternal(
                      InternalEscapableScope);
 
   i::ScriptData* script_data = nullptr;
+  DLOG("kConsumeCodeCache=%d", options == kConsumeCodeCache);
   if (options == kConsumeCodeCache) {
     DCHECK(source->cached_data);
     // ScriptData takes care of pointer-aligning the data.
@@ -2498,6 +2499,7 @@ MaybeLocal<Script> ScriptCompiler::Compile(Local<Context> context,
       !source->GetResourceOptions().IsModule(), "v8::ScriptCompiler::Compile",
       "v8::ScriptCompiler::CompileModule must be used to compile modules");
   auto isolate = context->GetIsolate();
+  DLOG("call CompileUnboundInternal| only for module");
   auto maybe =
       CompileUnboundInternal(isolate, source, options, no_cache_reason);
   Local<UnboundScript> result;

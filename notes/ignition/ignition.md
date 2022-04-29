@@ -301,6 +301,7 @@ BytecodeGraphBuilder 需要跟踪解析器的栈帧状态, 以在逆优化时重
 2. [Ignition](https://v8.dev/docs/ignition)
 3. [Ignition 设计文档(翻译版)](https://zhuanlan.zhihu.com/p/41496446)
 4. [Ignition Design Doc](https://docs.google.com/document/d/11T2CRex9hXxoJwbYqVQ32yIPMh0uouUZLdyrtmMoL44/edit#)
+5. [Sea of Nodes](https://darksi.de/d.sea-of-nodes/)
 
 ### 附录
 * 字节码列表在 bytecodes.h, 用 BYTECODE_LIST 定义. V8 很喜欢用 XXX_LIST 来精简代码, 例如 Builtins

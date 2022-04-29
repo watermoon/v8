@@ -37,13 +37,13 @@ V8 在托管堆的开始出预留了整个 CODE_SPACE, 以保证所有可能的�
 call <offset>
 ```
 
-<img src="./pc-relative-call.png" style="background-color: white" />
+<img src="./img/pc-relative-call.png" style="background-color: white" />
 
 为了可以在进程间共享, 生成的代码必须不可修改(immutable), 同时保持 isolate 和进程无关. 上面的指令序列都不满足要求: 他们直接将地址嵌入到代码中, 并且在运行时通过 GC 打补丁(即 GC 运行时更新和修改)
 
 为了解决这个问题, google 引入了一个间接的专用的, 所谓的根寄存器, 其中保存了一个指向当前 isolate 已知位置的指针.
 
-<img src="./isolate-layout.png" style="background-color: white" />
+<img src="./img/isolate-layout.png" style="background-color: white" />
 
 V8 的 isolate 类包含了根表(roots table), 表里包含了指向所有在托管堆上的根对象的指针. 而根寄存器永远保存这根表的地址. 因此以新的, isolate 和进程无关的方式加载一个根对象变成:
 ```asm
@@ -75,11 +75,11 @@ REX.W movq rax,[rax + 0x1d7]
 
 目标是将 builtins 代码打包进 .text 区域
 
-<img src=./binary-format.png style="background-color:white;"/>
+<img src=./img/binary-format.png style="background-color:white;"/>
 
 这些是通过在 V8 的内部编译器流水线中增加一个新的编译步骤来为所有的 builtins 生成原生代码(native code), 然后输出到 embedded.cc 的文件中.
 
-<img src=./build-process.png style="background-color:white;"/>
+<img src=./img/build-process.png style="background-color:white;"/>
 
 embedded.cc 文件包含元数据和生成的 builtins 机器码(以 .byte 指令的形式)来指引 C++ 编译器(我们这里是 gcc/clang) 来将指定的字节序列直接放到 object 文件中(然后是可执行文件)
 ```asm
@@ -98,11 +98,11 @@ __asm__(".byte 0x55,0x48,0x89,0xe5,0x6a,0x18,0x48,0x83\n"
 
 不过 V8 的代码对象(Code objects)不仅包含指令流, 还包含一些元数据(有些时候还是 isolate 相关的). 普通的代码对象打包操作会将元数据和指令流一起打包进托管堆的一个变长代码对象中.
 
-<img src=./code-on-heap.png style="background-color:white;"/>
+<img src=./img/code-on-heap.png style="background-color:white;"/>
 
 每一个 builtin 在托管堆中有一个关联的代码对象, 成为 `off-heap trampoline`(离堆蹦蹦床, 即胶水函数). 元数据像标准的代码对象一样保存在 trampoline 中, 但是内联的指令流仅仅包含一个很短的指令: 加载 builtin 真正的地址, 然后跳转过去.
 
-<img src=./code-off-heap.png style="background-color: white" />
+<img src=./img/code-off-heap.png style="background-color: white" />
 
 ### 性能优化
 上一节提到的解决方案基本是特性完整(feature-complete), 不过 benchmark 显示有比较大的性能损失. Speedometer 2.0 显示有 5% 的倒退.
@@ -124,10 +124,10 @@ __asm__(".byte 0x55,0x48,0x89,0xe5,0x6a,0x18,0x48,0x83\n"
 
 这些优化做完后, 性能损失被限制到了 0.5% 左右
 
-<img src=./isolate-layout-optimized.png style="background-color:white" />
+<img src=./img/isolate-layout-optimized.png style="background-color:white" />
 
 ### 结果
-<img src=./results.png style="background-color:white" />
+<img src=./img/results.png style="background-color:white" />
 
 消耗从 `c * (1 + n)` (其中 c 是所有 builtins 的内存消耗, n 是 isolate 的数量) 降低到了 `c * 1`
 
