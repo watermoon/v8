@@ -1693,6 +1693,7 @@ Local<String> Shell::ReadFromStdin(Isolate* isolate) {
                                              NewStringType::kNormal, length - 1)
                              .ToLocalChecked());
     } else {
+      // 通常进来这里
       return String::Concat(
           isolate, accumulator,
           String::NewFromUtf8(isolate, buffer, NewStringType::kNormal,
@@ -2712,6 +2713,15 @@ void Shell::RunShell(Isolate* isolate) {
     printf("d8> ");
     Local<String> input = Shell::ReadFromStdin(isolate);
     if (input.IsEmpty()) break;
+    const char* addr = (const char*)&input;
+    printf("INPUT=%d %p", input->Length(), addr);
+    for (int i = 0; i < input->Length(); ++i) {
+      printf("%x", *(char*)(addr + i));
+      if (i > 20) {
+        break;
+      }
+    }
+    printf("\n");
     ExecuteString(isolate, input, name, kPrintResult, kReportExceptions,
                   kProcessMessageQueue);
   }
@@ -4070,7 +4080,7 @@ void Shell::WaitForRunningWorkers() {
 int Shell::Main(int argc, char* argv[]) {
   v8::base::EnsureConsoleOutput();
   if (!SetOptions(argc, argv)) return 1;
- 
+
   v8::V8::InitializeICUDefaultLocation(argv[0], options.icu_data_file);
 
 #ifdef V8_INTL_SUPPORT

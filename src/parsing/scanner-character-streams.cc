@@ -253,7 +253,7 @@ class BufferedCharacterStream : public Utf16CharacterStream {
   bool ReadBlock() final {
     size_t position = pos();
     buffer_pos_ = position;
-    buffer_start_ = &buffer_[0];
+    buffer_start_ = &buffer_[0];   // 指向源码的第一个字符?
     buffer_cursor_ = buffer_start_;
 
     DisallowHeapAllocation no_gc;

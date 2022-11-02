@@ -74,6 +74,14 @@ class JSReceiver : public HeapObject {
   //
   // This is used only in the deoptimizer and heap. Please use the
   // above typed getters and setters to access the properties.
+  // 属性偏移有五个可能的值
+  // 1) EmptyFixedArray/EmptyPropertyDictionary - 这个是标准的占位符
+  // 2) Smi - 对象的哈希值
+  // 3) PropertyArray - 和 FixedArray 类似, 不过在它的长度字段(length field)存储对象的哈希值.
+  //    这个一个快速的辅助存储
+  // 4) NameDictionary - 字典模式的存储
+  // 5) GlobalDictionary - 全局对象(GlobalObject)的辅助存储
+  // 这个函数仅仅被逆优化器和堆. 请使用上线的类型存取器类访问属性
   DECL_ACCESSORS(raw_properties_or_hash, Object)
 
   inline void initialize_properties(Isolate* isolate);
@@ -295,6 +303,8 @@ class JSReceiver : public HeapObject {
 // properties.
 // Note that the map of JSObject changes during execution to enable inline
 // caching.
+// JSObject 描述了真实堆中分配的 JavaScript 对象及其属性
+// 注意: JSObject 的 map 会随着执行而改变, 以使 IC 起作用
 class JSObject : public TorqueGeneratedJSObject<JSObject, JSReceiver> {
  public:
   static bool IsUnmodifiedApiObject(FullObjectSlot o);

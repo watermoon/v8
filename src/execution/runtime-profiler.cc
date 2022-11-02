@@ -250,7 +250,7 @@ OptimizationReason RuntimeProfiler::ShouldOptimize(JSFunction function,
   ticks_for_optimization *= scale_factor;  // 乘以 scale
   PrintF("ShouldOptimize| ticks=%d bytecode_size=%d scale_factor=%d ticks_for_optimization=%d\n",
          ticks, bytecode.length(), scale_factor, ticks_for_optimization);
-  if (ticks >= ticks_for_optimization) {  // 如何 profiler 的 tick 数达到阈值, 表明函数是热函数且稳定
+  if (ticks >= ticks_for_optimization) {  // 如果 profiler 的 tick 数达到阈值, 表明函数是热函数且稳定
     return OptimizationReason::kHotAndStable;
   } else if (!any_ic_changed_ &&
              bytecode.length() < kMaxBytecodeSizeForEarlyOpt) {

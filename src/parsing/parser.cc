@@ -536,7 +536,9 @@ void Parser::ParseProgram(Isolate* isolate, Handle<Script> script,
     maybe_wrapped_arguments_ = handle(script->wrapped_arguments(), isolate);
   }
 
-  scanner_.Initialize();
+  // 编译的入口(不涉及优化)
+  // https://zhuanlan.zhihu.com/p/414382230
+  scanner_.Initialize();  // 扫描第一个字符
   FunctionLiteral* result = DoParseProgram(isolate, info);
   MaybeResetCharacterStream(info, result);
   MaybeProcessSourceRanges(info, result, stack_limit_);

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Isolate">
+    <DisplayString>{{v8::Isolate}}</DisplayString>
+    <Expand>
+      <Item Name="addr">0xefef</Item>
+      <Item Name="value">"isolate"</Item>
+    </Expand>
+  </Type>
+  <Type Name="v8::Local<String>">
+    <DisplayString>String</DisplayString>
+    <StringView>val_</StringView>
+  </Type>
+</AutoVisualizer>

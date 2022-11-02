@@ -37,6 +37,9 @@ class Zone;
 // Buffered stream of UTF-16 code units, using an internal UTF-16 buffer.
 // A code unit is a 16 bit value representing either a 16 bit code point
 // or one part of a surrogate pair that make a single 21 bit code point.
+// UTF-16 代码单元的缓存流, 使用一个内部的 UTF-16 buffer。
+// 一个代码单元是一个 16 bit 的值, 表示一个 16 bit 的代码点或者一个 21 bit 代码点
+// 的代理对的一部分。
 class Utf16CharacterStream {
  public:
   static constexpr uc32 kEndOfInput = static_cast<uc32>(-1);
@@ -62,6 +65,7 @@ class Utf16CharacterStream {
 
   // Returns and advances past the next UTF-16 code unit in the input
   // stream. If there are no more code units it returns kEndOfInput.
+  // 返回一个 UTF-16 代码单元, 并且前进一个代码单元。如果代码读进了则返回 kEndOfInput
   inline uc32 Advance() {
     uc32 result = Peek();
     buffer_cursor_++;
@@ -71,6 +75,7 @@ class Utf16CharacterStream {
   // Returns and advances past the next UTF-16 code unit in the input stream
   // that meets the checks requirement. If there are no more code units it
   // returns kEndOfInput.
+  // 读代码流知道满足检查条件, 并返回代码点。如果没有更多代码则返回 kEndOfInput
   template <typename FunctionType>
   V8_INLINE uc32 AdvanceUntil(FunctionType check) {
     while (true) {
@@ -95,10 +100,13 @@ class Utf16CharacterStream {
 
   // Go back one by one character in the input stream.
   // This undoes the most recent Advance().
+  // 回退一个代码点
   inline void Back() {
     // The common case - if the previous character is within
     // buffer_start_ .. buffer_end_ will be handles locally.
     // Otherwise, a new block is requested.
+    // 如果回退的位置在当前的代码块中(缓存的), 则本地处理就可以了.
+    // 否则需要往回读一个新的代码块(block)
     if (V8_LIKELY(buffer_cursor_ > buffer_start_)) {
       buffer_cursor_--;
     } else {
@@ -194,6 +202,16 @@ class Utf16CharacterStream {
   //   buffer_end_ to cover the full chunk, and then buffer_cursor_ would
   //   point into the middle of the buffer, while buffer_pos_ would describe
   //   the start of the buffer.
+  // 读更多数据, 更新对应的 buffer_*_ 来指向它
+  // 如果有更多数据, 则返回 true
+  //
+  // ReadBlock() 可能会修改 buffer_*_ 成员的任何一个, 不过需要保证 pos() 的结果不收影响
+  //
+  // 例子:
+  // - 一个流可能填充一个不同的 buffer。然后 buffer_start_ 和 buffer_cursor_ 会指向 buffer
+  //   的开头, buffer_pos 指向原来的 pos()
+  // - 一个现存的 buffer 块中的流可能会设置 buffer_start_ 和 buffer_end_ 来覆盖整个块,
+  //   buffer_cursor_ 会指向 buffer 的中间位置, 而 buffer_pos_ 会指示 buffer 的开始
   virtual bool ReadBlock() = 0;
 
   const uint16_t* buffer_start_;

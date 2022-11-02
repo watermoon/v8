@@ -49,6 +49,7 @@ bool ParseProgram(ParseInfo* info, Handle<Script> script,
   Handle<String> source(String::cast(script->source()), isolate);
   // 统计解析的字符数
   isolate->counters()->total_parse_size()->Increment(source->length());
+  // 字符流
   std::unique_ptr<Utf16CharacterStream> stream(
       ScannerStream::For(isolate, source));
   info->set_character_stream(std::move(stream));

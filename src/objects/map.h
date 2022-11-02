@@ -192,6 +192,7 @@ using MapHandles = std::vector<Handle<Map>>;
 // |               | Else:                                          |
 // |               |   [raw_transitions]                            |
 // +---------------+------------------------------------------------+
+// transition, 记录了 Map 迁移到其它 Map 的条件(例如添加了属性 x)
 
 class Map : public HeapObject {
  public:
@@ -327,7 +328,28 @@ class Map : public HeapObject {
   //
   //  Important: inobject slack tracking is not attempted during the snapshot
   //  creation.
-
+  //
+  // 回收对象内未使用空间的方法是跟踪对象内松弛跟踪空间(Inobject slack tracking)
+  //
+  // 实例大小最初确定是通过通过添加一些松弛空间到 `expected_nof_properties`(允许在构造函数后
+  // 添加少数几个属性, 通常是不大多于四个)来实现的。并没有保证这些额外的空间不会被浪费.
+  //
+  // 下面是回收对象内未使用空间的算法:
+  // - 检测这个 JSFunction 的第一次构造函数调用.
+  //   当发生(第一次构造函数调用)时, 进入 "in progress" 状态: 在 initial_map 中初始化
+  //   构造计数器
+  // - 当跟踪处在 “in progress"状态, 用 one_pointer_filler_map 初始化新对象的未使用属性,
+  //   而不是用 undefined_value(”used" 部分还是如往常一样用 undefined_value 进行初始化)
+  //   这样他们(只对象)可以被快速安全地尽心改变大小
+  // - 当足够多的对象被创建后, 计算松弛空间('slack').(从 initial_map 开始遍历 Map 转移树,
+  //   找到 unused_property_fields 的最小值)
+  // - 再一次遍历转移树, 减少每一个 Map 的实例大小. 现存的对象会自动改变大小(他们被 one_pointer_filler_map
+  //   填充). 后续所有的内存分配都会使用调整后的实例大小.
+  // - SharedFunctionInfo 的 expected_nof_properties 会保持不变, 因为使用不同的闭包分配
+  //   实际上会产生不同类型的对象(详见原型继承模式).
+  //
+  //  重要: 在进行 snapshot 创建的过程中, 不会尝试进行对象内松弛空间跟踪.
+  
   static const int kGenerousAllocationCount =
       kSlackTrackingCounterStart - kSlackTrackingCounterEnd + 1;
 

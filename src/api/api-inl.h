@@ -49,6 +49,7 @@ inline v8::internal::Handle<v8::internal::Object> FromCData(
 template <class From, class To>
 inline Local<To> Utils::Convert(v8::internal::Handle<From> obj) {
   DCHECK(obj.is_null() || (obj->IsSmi() || !obj->IsTheHole()));
+  // 好像 Local 没有这样一个构造函数?
   return Local<To>(reinterpret_cast<To*>(obj.location()));
 }
 

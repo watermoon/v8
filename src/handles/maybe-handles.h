@@ -24,6 +24,10 @@ constexpr NullMaybeHandleType kNullMaybeHandle;
 // Also note that Handles do not provide default equality comparison or hashing
 // operators on purpose. Such operators would be misleading, because intended
 // semantics is ambiguous between Handle location and object identity.
+// 一个 Handle 可以转换成 MaybeHandle. (但是)转换一个 MaybeHandle 到一个 Handle 需要
+// 检查它没有指向一个 nullptr(即 location_ 不是 nullptr)。这保证了在使用前的空指针检查
+//
+// 注意事项和 Handle 一样, 即不提供相等比较和哈希操作
 template <typename T>
 class MaybeHandle final {
  public:
@@ -86,6 +90,8 @@ class MaybeHandle final {
 
 // A handle which contains a potentially weak pointer. Keeps it alive (strongly)
 // while the MaybeObjectHandle is alive.
+// 一个包含了潜在弱指针的句柄。当 MaybeObjectHandle 存活时, 保证它(handle)也存活(强引用的方式)
+// 所以构造的时候, 需要是一个前应用的 Handle, 而不是 MaybeHandle
 class MaybeObjectHandle {
  public:
   inline MaybeObjectHandle()

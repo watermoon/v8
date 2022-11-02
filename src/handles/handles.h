@@ -36,6 +36,7 @@ class WasmExportedFunctionData;
 
 // ----------------------------------------------------------------------------
 // Base class for Handle instantiations.  Don't use directly.
+// Address 其实就是 uintptr_t 的一个别名(typedef)
 class HandleBase {
  public:
   V8_INLINE explicit HandleBase(Address* location) : location_(location) {}
@@ -84,6 +85,17 @@ class HandleBase {
 // operators on purpose. Such operators would be misleading, because intended
 // semantics is ambiguous between Handle location and object identity. Instead
 // use either {is_identical_to} or {location} explicitly.
+//
+// Handle 提供一个到对象的引用,  GC 后重定位依然可以引用到
+//
+// Handles 仅在一个 HandleScope 内有效。当创建一个句柄时, 会在当前 HandleScope
+// 分配一个对象单元(槽位 cell)
+//
+// 也要注意 Handles 不特意提供默认的比较函数或者哈希操作。这样的操作可能会误导,
+// 因为 Handle 的位置(地址/location)和对象 ID 的预期语义是有歧义的。显式地使用
+// {is_identical_to} 或者 {location}。
+
+
 template <typename T>
 class Handle final : public HandleBase {
  public:

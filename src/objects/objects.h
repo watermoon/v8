@@ -273,8 +273,8 @@ ShouldThrow GetShouldThrow(Isolate* isolate, Maybe<ShouldThrow> should_throw);
 // containing the tagged heap pointer that this Object instance refers to.
 // For a design overview, see https://goo.gl/Ph4CGz.
 // Object 是对象结构中所有类的基类
-// Object 不适用任何的虚函数, 以避免分配 C++ 的虚表
-// Object 中必须只有一个数据类型: Address 指针, 指向对象实例的对地址
+// Object 不使用任何的虚函数, 以避免分配 C++ 的虚表
+// Object 中必须只有一个数据类型: Address 指针, 指向对象实例的堆地址
 // 总体设计, 请看: https://goo.gl/Ph4CGz
 class Object : public TaggedImpl<HeapObjectReferenceType::STRONG, Address> {
  public:
